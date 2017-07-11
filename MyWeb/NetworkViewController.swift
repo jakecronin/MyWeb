@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import FacebookCore
+import SceneKit
 
 
 class NetworkViewController: UIViewController{
@@ -16,19 +17,37 @@ class NetworkViewController: UIViewController{
 	var myName = "Jake Cronin"
 	var friends = [FriendNode]()
 	
+	var unselectedColor = UIColor.green
+	var selectedColor = UIColor.blue
+	var cameraOrigin = SCNVector3Make(0, 0, 20)
+	
+	@IBOutlet weak var sceneView: SCNView!
+	var cameraNode = SCNNode()
+	var lineArray = [SCNNode]()
+
+	
 	override func viewDidLoad() {
 		print("network view controller loaded")
-		
+		sceneSetup()
 		getFriendsAndName()
 	}
-
-	//me -> photos -> photo -> tagged
+	func sceneSetup(){
+		let scene = SCNScene()
+		
+		cameraNode.camera = SCNCamera()
+		cameraNode.camera!.zFar = 1000
+		cameraNode.position = cameraOrigin
+		scene.rootNode.addChildNode(cameraNode)
+		
+		sceneView.showsStatistics = true
+		sceneView.backgroundColor = UIColor.black
+		
+		sceneView.scene = scene
+	}
 	
 	
 	func getFriendsAndName(){
 		let connection = GraphRequestConnection()
-	
-		
 		//GET Name
 		var nameRequest = GraphRequest(graphPath: "/me")
 		nameRequest.parameters = ["fields": "id, name, email"]
@@ -42,7 +61,6 @@ class NetworkViewController: UIViewController{
 			}
 		}
 		
-	
 		//Get Friends from Photo Tags
 		var photosRequest = GraphRequest(graphPath: "me/photos")
 		photosRequest.parameters = ["fields": "tags"]
@@ -62,7 +80,6 @@ class NetworkViewController: UIViewController{
 		}
 		connection.start()
 	}
-	
 	func getNamesFromPhotosResponse(result: Dictionary<String, Any>){
 		print("handling post response")
 		
@@ -98,7 +115,6 @@ class NetworkViewController: UIViewController{
 		print("\n\n\ngot all the names!!!: \n \(names)")
 		makeFriendObjectsFrom(namesDictionary: names)
 	}
-	
 	func makeFriendObjectsFrom(namesDictionary: Dictionary<String, Int>){
 	
 		friends = [FriendNode]()
@@ -114,53 +130,68 @@ class NetworkViewController: UIViewController{
 			me.children.append(newFriend)
 			friends.append(newFriend)
 		}
+		print("going to graph maker to design graph")
 		JCGraphMaker.sharedInstance.delegate = self
 		JCGraphMaker.sharedInstance.createGraphFrom(tree: me)
+	}
+	
+	
+	//MARK: Draw Functions
+	
+	func drawNode(node: JCGraphNode){
+		node.geometry = SCNSphere(radius: CGFloat(node.radius))
+		node.position = SCNVector3Make(Float(node.x), Float(node.y), Float(node.z))
+		node.geometry?.firstMaterial?.diffuse.contents = unselectedColor
+		sceneView.scene!.rootNode.addChildNode(node)
+		print("added node: (\(node.x), \(node.y), \(node.z))")
+	}
+	
+	func drawText(_ coords: (Float, Float)?, text: String, radius: Float){
+		if coords == nil{
+			print("no coordinates found for node. Not drawing")
+			return
+		}
+		//var size = CGSize(width: CGFloat(radius * 0.7), height: CGFloat(radius * 0.7))
+		//var nsString = NSString(string: text)
+		//nsString.boundingRectWithSize(size, options: NSStringDrawingOptions, attributes: nil, context: nil)
+		let myWord = SCNText(string: text, extrusionDepth: 0.1)
+		myWord.containerFrame = CGRect(x: CGFloat(coords!.0), y: CGFloat(coords!.1), width: CGFloat(radius * 0.7), height: CGFloat(radius * 0.7))
+		let wordNode = SCNNode(geometry: myWord)
+		let position = SCNVector3Make(coords!.0, coords!.1, 0)
+		wordNode.position = position
+		sceneView.scene!.rootNode.addChildNode(wordNode)
+	}
+	func drawLine(from: JCGraphNode, to: JCGraphNode){
+		let indices: [Int32] = [0, 1]
+		let source = SCNGeometrySource(vertices: [from.position, to.position], count: 2)
+		let element = SCNGeometryElement(indices: indices, primitiveType: .line)
+		let lineNode = SCNNode(geometry: SCNGeometry(sources: [source], elements: [element]))
+		sceneView.scene!.rootNode.addChildNode(lineNode)
+		lineArray.append(lineNode)
+		
+	}
+	func drawLinesForGraph(graph: JCGraphObject){
+		for node in lineArray{
+			node.removeFromParentNode()
+		}
+		for node in graph.adjacents.keys{
+			for child in node.children{
+				drawLine(from: node, to: child)
+			}
+		}
+	}
+	func drawNodesForGraph(graph: JCGraphObject){
+		for node in graph.adjacents.keys{
+			drawNode(node: node)
+		}
 	}
 }
 
 extension NetworkViewController: JCGraphMakerDelegate{
 	func graphIsComplete(graph: JCGraphObject){
-		print("got graph")
+		print("graph is complete. going to draw it")
+		drawLinesForGraph(graph: graph)
+		drawNodesForGraph(graph: graph)
 	}
 }
 
-
-//Draws 'Drawable' Objects, contain certain variables, aka coordinates
-//Draws graphs, must be an adjacency list of drawable objects
-
-
-
-/*
-	Steps: 
-
-	1. Loads in data from facebook (friends for now)
-	2. Put friends into FriendNode objects
-	3. Build a JCGraph Object
-	4. Send JCGraph Object to GraphMaker -> spaces out the nodes
-	5. Draw the finished graph
-
-
-
-
-
-	
-	Create Drawable objects with friends
-		-Friend, Coordinates,
-
-	Friends inserted into Graph object
-	
-	Send graph to GraphMaker (takes adjacency list)
-
-	GraphMaker spaces out the objects and sends them back
-
-
-	Friends are inserted into an adjacency list (array of lists, just 1 long at first for me)
-	Firends array: [Me, Jimmy, Scott, John, Caleb]
-	[
-
-	]
-
-
-
-*/

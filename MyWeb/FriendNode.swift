@@ -10,11 +10,15 @@ import Foundation
 
 class FriendNode: JCGraphNode{
 	
-	var name: String!
+	var friendName: String!
 	
 	init(name: String, weight: Double) {
 		super.init(weight: weight)
-		self.name = name
+		friendName = name
+	}
+	
+	required init?(coder aDecoder: NSCoder) {
+		fatalError("init(coder:) has not been implemented")
 	}
 	
 }

@@ -103,7 +103,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <sceneKitView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="KAE-Ij-wCy">
+                            <sceneKitView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" allowsCameraControl="YES" autoenablesDefaultLighting="YES" translatesAutoresizingMaskIntoConstraints="NO" id="KAE-Ij-wCy">
                                 <rect key="frame" x="0.0" y="64" width="375" height="603"/>
                             </sceneKitView>
                         </subviews>
@@ -116,6 +116,9 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="MyWeb" id="qTQ-kU-AQ9" userLabel="My"/>
+                    <connections>
+                        <outlet property="sceneView" destination="KAE-Ij-wCy" id="Agg-or-D7z"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="7SI-rX-42E" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

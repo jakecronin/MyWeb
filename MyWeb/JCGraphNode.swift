@@ -7,9 +7,10 @@
 //
 
 import Foundation
+import SceneKit
 
 
-class JCGraphNode: NSObject{
+class JCGraphNode: SCNNode{
 	
 	//coordinates
 	
@@ -21,12 +22,34 @@ class JCGraphNode: NSObject{
 	var dy: Double = 0
 	var dz: Double = 0
 	
+	var radius: Double = 0.1
+	
 	var weight: Double = 1
 	
 	var children = [JCGraphNode]()
 	
 	init(weight: Double) {
+		super.init()
 		self.weight = weight
+	}
+	
+	required init?(coder aDecoder: NSCoder) {
+		fatalError("init(coder:) has not been implemented")
+	}
+	
+	func updatePosition(){
+		x = x + dx
+		y = y + dy
+		z = z + dz
+		
+		dx = 0
+		dy = 0
+		dz = 0
+	}
+	func centerNode(){
+		x = 0
+		y = 0
+		z = 0
 	}
 	
 }

@@ -14,18 +14,128 @@ protocol JCGraphMakerDelegate {
 
 class JCGraphMaker{
 	
+	//Formatting Variable
+	let attractScale: Double = 0.0000006
+	let repulsScale: Double =  0.00005
+
+	////////////
+	
+	
 	static let sharedInstance = JCGraphMaker()
-	
 	var delegate: JCGraphMakerDelegate?
-	
 	var graph: JCGraphObject!
 	
 	func createGraphFrom(tree: JCGraphNode){
 		graph = JCGraphObject(with: tree)
+		initializeCoordinates(for: tree)
+		for i in 0..<100{
+			iterateAndUpdate()
+		}
+		delegate?.graphIsComplete(graph: graph)
 	}
 	
 	
 	
 	
+	
+	func initializeCoordinates(for tree: JCGraphNode){	//calculate positions of nodes
+		//Initialize other nodes at random coordinates
+		for node in graph.adjacents.keys{
+			node.x = rand()
+			node.y = rand()
+			node.z = rand()
+			
+			node.dz = 0
+			node.dy = 0
+			node.dx = 0
+		}
+		
+		tree.dx = 0
+		tree.dy = 0
+		tree.dz = 0
+		
+		tree.x = 0
+		tree.y = 0
+		tree.z = 0
+		
+		tree.radius = 1
+		
+		
+	}
+	func rand() -> Double{
+		return (drand48() - 0.5) * 10
+	}
+	
+	func iterateAndUpdate(){
+		for node in graph.adjacents.keys{
+			for rec in node.children{
+				applyEdgeForce(nodeA: node, nodeB: rec)
+			}
+			for otherNode in graph.adjacents.keys{
+				applyNodeForce(nodeA: node, nodeB: otherNode)
+			}
+		}
+		for node in graph.adjacents.keys{
+			node.updatePosition()
+		}
+		graph.center.centerNode()
+	}
+	
+	func applyEdgeForce(nodeA: JCGraphNode, nodeB: JCGraphNode){
+		//pull edges together
+		//longer edges have stronger pull, luke rubber band
+		
+		//calculate components of separation between nodes
+		
+		let dx = nodeA.x - nodeB.x
+		let dy = nodeA.y - nodeB.y
+		let dz = nodeA.z - nodeB.z
+		
+		let forceAttract = (dx * dx) + (dy * dy) + (dz * dz)	//separation distance squared
+		let separationDistance = sqrt(forceAttract)
+		if separationDistance == 0{
+			return
+		}
+		
+		let scaledForce = forceAttract * attractScale
+		
+		nodeA.dx = nodeA.dx + scaledForce * (dx / separationDistance)
+		nodeA.dy = nodeA.dy + scaledForce * (dy / separationDistance)
+		nodeA.dz = nodeA.dz + scaledForce * (dz / separationDistance)
+		
+		nodeB.dx = nodeB.dx - scaledForce * (dx / separationDistance)
+		nodeB.dy = nodeB.dy - scaledForce * (dy / separationDistance)
+		nodeB.dz = nodeB.dz - scaledForce * (dz / separationDistance)
+		
+	}
+	
+	func applyNodeForce(nodeA: JCGraphNode, nodeB: JCGraphNode){
+		
+		let dx = nodeA.x - nodeB.x
+		let dy = nodeA.y - nodeB.y
+		let dz = nodeA.z - nodeB.z
+		
+		var separationDistance = sqrt((dx*dx) + (dy*dy) + (dz*dz))	//length of distance
+
+		var repulsiveForce = repulsScale / separationDistance
+		if separationDistance == 0{
+			separationDistance = 0.00000001
+		}
+		if repulsiveForce.isNaN{
+			repulsiveForce = 0
+		}
+		if repulsiveForce.isInfinite{
+			repulsiveForce = Double.greatestFiniteMagnitude
+		}
+		
+		nodeA.dx = nodeA.dx + repulsiveForce * (dx / separationDistance) //cos(xyAngle)
+		nodeA.dy = nodeA.dy + repulsiveForce * (dy / separationDistance)//sin(xyAngle)
+		nodeA.dz = nodeA.dz + repulsiveForce * (dz / separationDistance)//cos(yzAngle)
+		
+		nodeB.dx = nodeB.dx - repulsiveForce * (dx / separationDistance)
+		nodeB.dy = nodeB.dy - repulsiveForce * (dy / separationDistance)
+		nodeB.dz = nodeB.dz - repulsiveForce * (dz / separationDistance)
+		
+	}
 	
 }

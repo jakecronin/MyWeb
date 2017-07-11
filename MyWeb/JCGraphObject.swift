@@ -11,8 +11,10 @@ import Foundation
 class JCGraphObject{
 	
 	var adjacents: [JCGraphNode: [JCGraphNode]]!
+	var center: JCGraphNode!
 	
 	init(with tree: JCGraphNode) {
+		center = tree
 		adjacents = [JCGraphNode: [JCGraphNode]]()
 		recursAdd(node: tree)
 	}
