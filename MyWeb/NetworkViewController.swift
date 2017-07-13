@@ -10,20 +10,24 @@ import Foundation
 import UIKit
 import FacebookCore
 import SceneKit
+import FBSDKCoreKit
 
 
 class NetworkViewController: UIViewController{
 	
 	var myName = "Jake Cronin"
+	var names = [String: Int]()
 	var friends = [FriendNode]()
 	
 	var unselectedColor = UIColor.green
 	var selectedColor = UIColor.blue
+	var lineColor = UIColor.gray
 	var cameraOrigin = SCNVector3Make(0, 0, 20)
 	
 	@IBOutlet weak var sceneView: SCNView!
 	var cameraNode = SCNNode()
-	var lineArray = [SCNNode]()
+	var lineArray = [SCNNode]()		//so I can remove them later
+	var nodeArray = [SCNNode]()		//so I can remove them later
 
 	
 	override func viewDidLoad() {
@@ -47,6 +51,7 @@ class NetworkViewController: UIViewController{
 	
 	
 	func getFriendsAndName(){
+		names = [String: Int]()
 		let connection = GraphRequestConnection()
 		//GET Name
 		var nameRequest = GraphRequest(graphPath: "/me")
@@ -69,7 +74,7 @@ class NetworkViewController: UIViewController{
 			case .success(let response):
 				if let dict = response.dictionaryValue{
 					print("grpah request succeeded, going to handle post response")
-					//print(response)
+					print(response)
 					self.getNamesFromPhotosResponse(result: dict)
 				}else{
 					print("ERROR: Graph Request Succeeded, but could not make dictionary.: \(response)")
@@ -82,8 +87,6 @@ class NetworkViewController: UIViewController{
 	}
 	func getNamesFromPhotosResponse(result: Dictionary<String, Any>){
 		print("handling post response")
-		
-		var names = [String: Int]()
 		
 		guard let photos = result["data"] as? [Dictionary<String, Any>] else{
 			print("unable to make photos array")
@@ -112,8 +115,37 @@ class NetworkViewController: UIViewController{
 				}
 			}
 		}
-		print("\n\n\ngot all the names!!!: \n \(names)")
-		makeFriendObjectsFrom(namesDictionary: names)
+		
+		if let next = (result["paging"] as? [String: Any])?["next"] as? String{
+			nextPhotosRequest(next: next)
+		}else{
+			print("\n\n\ngot all the names!!!: \n \(names)")
+			makeFriendObjectsFrom(namesDictionary: names)
+		}
+	}
+	func nextPhotosRequest(next: String){
+		var nextParameters = FBSDKUtility.dictionary(withQueryString: next) as! [String: Any]
+		nextParameters["fields"] = "tags"
+		
+		let connection = GraphRequestConnection()
+		let photosRequest = GraphRequest(graphPath: "me/photos", parameters: nextParameters as! [String : Any], accessToken: AccessToken.current, httpMethod: .GET, apiVersion: .defaultVersion)
+		//nameRequeset.parameters = ["fields": "id, name, email"]
+		connection.add(photosRequest) { (httpResponse, result) in
+			switch result {
+			case .success(let response):
+				if let dict = response.dictionaryValue{
+					print("grpah request succeeded, going to handle post response")
+					print(response)
+					self.getNamesFromPhotosResponse(result: dict)
+				}else{
+					print("ERROR: Graph Request Succeeded, but could not make dictionary.: \(response)")
+				}
+			case .failed(let error):
+				print("Graph Request Failed: \(error)")
+			}
+		}
+		connection.start()
+		
 	}
 	func makeFriendObjectsFrom(namesDictionary: Dictionary<String, Int>){
 	
@@ -139,25 +171,23 @@ class NetworkViewController: UIViewController{
 	//MARK: Draw Functions
 	
 	func drawNode(node: JCGraphNode){
+		for node in nodeArray{
+			node.removeFromParentNode()
+		}
 		node.geometry = SCNSphere(radius: CGFloat(node.radius))
 		node.position = SCNVector3Make(Float(node.x), Float(node.y), Float(node.z))
 		node.geometry?.firstMaterial?.diffuse.contents = unselectedColor
 		sceneView.scene!.rootNode.addChildNode(node)
-		print("added node: (\(node.x), \(node.y), \(node.z))")
+		//nodeArray.append(node)
 	}
 	
-	func drawText(_ coords: (Float, Float)?, text: String, radius: Float){
-		if coords == nil{
-			print("no coordinates found for node. Not drawing")
-			return
-		}
-		//var size = CGSize(width: CGFloat(radius * 0.7), height: CGFloat(radius * 0.7))
-		//var nsString = NSString(string: text)
-		//nsString.boundingRectWithSize(size, options: NSStringDrawingOptions, attributes: nil, context: nil)
-		let myWord = SCNText(string: text, extrusionDepth: 0.1)
-		myWord.containerFrame = CGRect(x: CGFloat(coords!.0), y: CGFloat(coords!.1), width: CGFloat(radius * 0.7), height: CGFloat(radius * 0.7))
+	func drawText(on node: JCGraphNode, text: String){
+		let myWord = SCNText(string: text, extrusionDepth: 0.03)
+		myWord.font = UIFont.systemFont(ofSize: 0.2)
 		let wordNode = SCNNode(geometry: myWord)
-		let position = SCNVector3Make(coords!.0, coords!.1, 0)
+		var position = node.position
+		position.x = position.x - 1
+		position.y = position.y - 1 + Float(node.radius)
 		wordNode.position = position
 		sceneView.scene!.rootNode.addChildNode(wordNode)
 	}
@@ -166,9 +196,9 @@ class NetworkViewController: UIViewController{
 		let source = SCNGeometrySource(vertices: [from.position, to.position], count: 2)
 		let element = SCNGeometryElement(indices: indices, primitiveType: .line)
 		let lineNode = SCNNode(geometry: SCNGeometry(sources: [source], elements: [element]))
+		lineNode.geometry?.firstMaterial?.diffuse.contents = lineColor
 		sceneView.scene!.rootNode.addChildNode(lineNode)
 		lineArray.append(lineNode)
-		
 	}
 	func drawLinesForGraph(graph: JCGraphObject){
 		for node in lineArray{
@@ -183,6 +213,13 @@ class NetworkViewController: UIViewController{
 	func drawNodesForGraph(graph: JCGraphObject){
 		for node in graph.adjacents.keys{
 			drawNode(node: node)
+			if let friend = node as? FriendNode{
+				guard let name = friend.friendName else{
+					print("no name")
+					continue
+				}
+				drawText(on: node, text: name)
+			}
 		}
 	}
 }

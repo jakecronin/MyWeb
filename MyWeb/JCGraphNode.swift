@@ -22,7 +22,7 @@ class JCGraphNode: SCNNode{
 	var dy: Double = 0
 	var dz: Double = 0
 	
-	var radius: Double = 0.1
+	var radius: Double = 0.3
 	
 	var weight: Double = 1
 	
@@ -45,6 +45,8 @@ class JCGraphNode: SCNNode{
 		dx = 0
 		dy = 0
 		dz = 0
+		
+		self.position = SCNVector3Make(Float(x), Float(y), Float(z))
 	}
 	func centerNode(){
 		x = 0

@@ -28,16 +28,11 @@ class JCGraphMaker{
 	func createGraphFrom(tree: JCGraphNode){
 		graph = JCGraphObject(with: tree)
 		initializeCoordinates(for: tree)
-		for i in 0..<100{
+		for _ in 0..<100{
 			iterateAndUpdate()
 		}
 		delegate?.graphIsComplete(graph: graph)
 	}
-	
-	
-	
-	
-	
 	func initializeCoordinates(for tree: JCGraphNode){	//calculate positions of nodes
 		//Initialize other nodes at random coordinates
 		for node in graph.adjacents.keys{
@@ -48,6 +43,8 @@ class JCGraphMaker{
 			node.dz = 0
 			node.dy = 0
 			node.dx = 0
+			
+			node.updatePosition()
 		}
 		
 		tree.dx = 0
@@ -97,7 +94,7 @@ class JCGraphMaker{
 			return
 		}
 		
-		let scaledForce = forceAttract * attractScale
+		let scaledForce = forceAttract * attractScale * (nodeA.weight + nodeB.weight)
 		
 		nodeA.dx = nodeA.dx + scaledForce * (dx / separationDistance)
 		nodeA.dy = nodeA.dy + scaledForce * (dy / separationDistance)

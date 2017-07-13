@@ -103,17 +103,17 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <sceneKitView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" allowsCameraControl="YES" autoenablesDefaultLighting="YES" translatesAutoresizingMaskIntoConstraints="NO" id="KAE-Ij-wCy">
+                            <stackView opaque="NO" contentMode="scaleToFill" fixedFrame="YES" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="c2J-9T-DI2">
                                 <rect key="frame" x="0.0" y="64" width="375" height="603"/>
-                            </sceneKitView>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <subviews>
+                                    <sceneKitView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" ambiguous="YES" allowsCameraControl="YES" autoenablesDefaultLighting="YES" translatesAutoresizingMaskIntoConstraints="NO" id="KAE-Ij-wCy">
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="603"/>
+                                    </sceneKitView>
+                                </subviews>
+                            </stackView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                        <constraints>
-                            <constraint firstItem="PYa-cB-C55" firstAttribute="top" secondItem="KAE-Ij-wCy" secondAttribute="bottom" id="Ndd-gs-d98"/>
-                            <constraint firstItem="KAE-Ij-wCy" firstAttribute="top" secondItem="XHE-cY-JrG" secondAttribute="bottom" id="UWp-Yo-gRP"/>
-                            <constraint firstAttribute="trailing" secondItem="KAE-Ij-wCy" secondAttribute="trailing" id="XSh-Tp-c12"/>
-                            <constraint firstItem="KAE-Ij-wCy" firstAttribute="leading" secondItem="UsM-RL-Wdr" secondAttribute="leading" id="bWu-82-11N"/>
-                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="MyWeb" id="qTQ-kU-AQ9" userLabel="My"/>
                     <connections>
