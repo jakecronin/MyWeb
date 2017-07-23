@@ -8,7 +8,7 @@
 
 import Foundation
 
-class JCGraphObject{
+class JCTreeGraph{
 	
 	var adjacents: [JCGraphNode: [JCGraphNode]]!
 	var center: JCGraphNode!

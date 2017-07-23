@@ -12,7 +12,7 @@ class FriendNode: JCGraphNode{
 	
 	var friendName: String!
 	
-	init(name: String, weight: Double) {
+	override init(name: String, weight: Double) {
 		super.init(weight: weight)
 		friendName = name
 	}

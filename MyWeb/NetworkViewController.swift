@@ -33,7 +33,10 @@ class NetworkViewController: UIViewController{
 	override func viewDidLoad() {
 		print("network view controller loaded")
 		sceneSetup()
-		getFriendsAndName()
+		let facebookHandler = FacebookHandler()
+		facebookHandler.getAllPhotos(delegate: self)	//graph greated in didGetAllPhotosDelegate
+		//get coordinates for nodes in graph (JCGraphMaker)
+		//draw graph
 	}
 	func sceneSetup(){
 		let scene = SCNScene()
@@ -48,107 +51,11 @@ class NetworkViewController: UIViewController{
 		
 		sceneView.scene = scene
 	}
+
 	
-	
-	func getFriendsAndName(){
-		names = [String: Int]()
-		let connection = GraphRequestConnection()
-		//GET Name
-		var nameRequest = GraphRequest(graphPath: "/me")
-		nameRequest.parameters = ["fields": "id, name, email"]
-		
-		connection.add(nameRequest, batchEntryName: "UserName") { (httpResponse, result) in
-			switch result{
-			case .success(response: let response):
-				print("response succeeded for name: \(response)")
-			case .failed(let error):
-				print("name request error: \(error)")
-			}
-		}
-		
-		//Get Friends from Photo Tags
-		var photosRequest = GraphRequest(graphPath: "me/photos")
-		photosRequest.parameters = ["fields": "tags"]
-		connection.add(photosRequest, batchParameters: ["depends_on": "UserName"]) { (httpResponse, result) in
-			switch result {
-			case .success(let response):
-				if let dict = response.dictionaryValue{
-					print("grpah request succeeded, going to handle post response")
-					print(response)
-					self.getNamesFromPhotosResponse(result: dict)
-				}else{
-					print("ERROR: Graph Request Succeeded, but could not make dictionary.: \(response)")
-				}
-			case .failed(let error):
-				print("Graph Request Failed: \(error)")
-			}
-		}
-		connection.start()
-	}
-	func getNamesFromPhotosResponse(result: Dictionary<String, Any>){
-		print("handling post response")
-		
-		guard let photos = result["data"] as? [Dictionary<String, Any>] else{
-			print("unable to make photos array")
-			return
-		}
-		
-		for photo in photos{
-			
-			guard let tags = photo["tags"] as? Dictionary<String, Any> else{
-				print("unable to get tags from photo")
-				return
-			}
-			guard let tagArray = tags["data"] as? [Dictionary<String, Any>] else{
-				print("unable to make tag array ")
-				return
-			}
-			for tag in tagArray{
-				guard let name = tag["name"] as? String else{
-					print("unable to get name in tag")
-					return
-				}
-				if names[name] == nil{
-					names[name] = 1
-				}else{
-					names[name] = names[name]! + 1
-				}
-			}
-		}
-		
-		if let next = (result["paging"] as? [String: Any])?["next"] as? String{
-			nextPhotosRequest(next: next)
-		}else{
-			print("\n\n\ngot all the names!!!: \n \(names)")
-			makeFriendObjectsFrom(namesDictionary: names)
-		}
-	}
-	func nextPhotosRequest(next: String){
-		var nextParameters = FBSDKUtility.dictionary(withQueryString: next) as! [String: Any]
-		nextParameters["fields"] = "tags"
-		
-		let connection = GraphRequestConnection()
-		let photosRequest = GraphRequest(graphPath: "me/photos", parameters: nextParameters as! [String : Any], accessToken: AccessToken.current, httpMethod: .GET, apiVersion: .defaultVersion)
-		//nameRequeset.parameters = ["fields": "id, name, email"]
-		connection.add(photosRequest) { (httpResponse, result) in
-			switch result {
-			case .success(let response):
-				if let dict = response.dictionaryValue{
-					print("grpah request succeeded, going to handle post response")
-					print(response)
-					self.getNamesFromPhotosResponse(result: dict)
-				}else{
-					print("ERROR: Graph Request Succeeded, but could not make dictionary.: \(response)")
-				}
-			case .failed(let error):
-				print("Graph Request Failed: \(error)")
-			}
-		}
-		connection.start()
-		
-	}
+	//FIXME: MakeFriendObjectsFrom is deprecated, delete when you want
 	func makeFriendObjectsFrom(namesDictionary: Dictionary<String, Int>){
-	
+		
 		friends = [FriendNode]()
 		let me = FriendNode(name: myName, weight: Double(namesDictionary[myName]!))
 		friends.append(me)
@@ -167,9 +74,43 @@ class NetworkViewController: UIViewController{
 		JCGraphMaker.sharedInstance.createGraphFrom(tree: me)
 	}
 	
-	
+}
+extension NetworkViewController: facebookHandlerDelegate{
+	func didGetMyProfile(profile: [String : Any]?) {
+		//
+	}
+	func didGetAllPhotos(photos: [String : [String]]?) {
+		print("got all photos: \(photos)")
+		guard photos != nil else{
+			return
+		}
+		var graph = [String:[String: Int]]()
+		for photo in photos!.values{
+			for name in photo{
+				if graph[name] == nil{
+					graph[name] = [String: Int]()
+				}
+				/*Go through all other tagged
+				people in photo and insert them or increment their counter*/
+				for tagged in photo{
+					guard tagged != name else{
+						continue
+					}
+					if graph[name]![tagged] == nil{
+						graph[name]![tagged] = 1
+					}else{
+						graph[name]![tagged] = graph[name]![tagged]! + 1
+					}
+				}
+			}
+		}
+		print("\n\nall the names \(graph.keys.count): \(graph)")
+		JCGraphMaker.sharedInstance.delegate = self
+		JCGraphMaker.sharedInstance.createGraphFrom(adjList: graph)
+	}
+}
+extension NetworkViewController{
 	//MARK: Draw Functions
-	
 	func drawNode(node: JCGraphNode){
 		for node in nodeArray{
 			node.removeFromParentNode()
@@ -180,7 +121,6 @@ class NetworkViewController: UIViewController{
 		sceneView.scene!.rootNode.addChildNode(node)
 		//nodeArray.append(node)
 	}
-	
 	func drawText(on node: JCGraphNode, text: String){
 		let myWord = SCNText(string: text, extrusionDepth: 0.03)
 		myWord.font = UIFont.systemFont(ofSize: 0.2)
@@ -191,7 +131,7 @@ class NetworkViewController: UIViewController{
 		wordNode.position = position
 		sceneView.scene!.rootNode.addChildNode(wordNode)
 	}
-	func drawLine(from: JCGraphNode, to: JCGraphNode){
+	func drawLine(from: JCGraphNode, to: JCGraphNode, weight: Double){
 		let indices: [Int32] = [0, 1]
 		let source = SCNGeometrySource(vertices: [from.position, to.position], count: 2)
 		let element = SCNGeometryElement(indices: indices, primitiveType: .line)
@@ -200,17 +140,26 @@ class NetworkViewController: UIViewController{
 		sceneView.scene!.rootNode.addChildNode(lineNode)
 		lineArray.append(lineNode)
 	}
-	func drawLinesForGraph(graph: JCGraphObject){
+	
+	func drawLinesForGraph(graph: [String:[(node: JCGraphNode, weight: Double)]]){
+		
+	}
+	func drawNodesForGraph(graph: [String:[(node: JCGraphNode, weight: Double)]]){
+		
+	}
+	
+	//FIXME: Deprecated for tree, aka noncyclical graph
+	func drawLinesForTree(graph: JCTreeGraph){
 		for node in lineArray{
 			node.removeFromParentNode()
 		}
 		for node in graph.adjacents.keys{
 			for child in node.children{
-				drawLine(from: node, to: child)
+				drawLine(from: node, to: child, weight: 0)
 			}
 		}
 	}
-	func drawNodesForGraph(graph: JCGraphObject){
+	func drawNodesForTree(graph: JCTreeGraph){
 		for node in graph.adjacents.keys{
 			drawNode(node: node)
 			if let friend = node as? FriendNode{
@@ -225,8 +174,8 @@ class NetworkViewController: UIViewController{
 }
 
 extension NetworkViewController: JCGraphMakerDelegate{
-	func graphIsComplete(graph: JCGraphObject){
-		print("graph is complete. going to draw it")
+	func graphIsComplete(graph: [String:[(node: JCGraphNode, weight: Double)]], withNodes: [String:JCGraphNode]){
+		print("graph is complete, going to draw it")
 		drawLinesForGraph(graph: graph)
 		drawNodesForGraph(graph: graph)
 	}

@@ -32,6 +32,11 @@ class JCGraphNode: SCNNode{
 		super.init()
 		self.weight = weight
 	}
+	init(name: String, weight: Double) {
+		super.init()
+		self.name = name
+		self.weight = weight
+	}
 	
 	required init?(coder aDecoder: NSCoder) {
 		fatalError("init(coder:) has not been implemented")
