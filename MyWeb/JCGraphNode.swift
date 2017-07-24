@@ -28,6 +28,10 @@ class JCGraphNode: SCNNode{
 	
 	var children = [JCGraphNode]()
 	
+	var max = Double.greatestFiniteMagnitude
+	var min = Double.greatestFiniteMagnitude * -1
+	
+	
 	init(weight: Double) {
 		super.init()
 		self.weight = weight
@@ -46,6 +50,22 @@ class JCGraphNode: SCNNode{
 		x = x + dx
 		y = y + dy
 		z = z + dz
+		
+		if x > max{
+			x = max
+		}else if x < min{
+			x = min
+		}
+		if y > max{
+			y = max
+		}else if y < min{
+			y = min
+		}
+		if z > max{
+			z = max
+		}else if z < min{
+			z = min
+		}
 		
 		dx = 0
 		dy = 0

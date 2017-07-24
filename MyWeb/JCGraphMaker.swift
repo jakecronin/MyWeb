@@ -9,15 +9,17 @@
 import Foundation
 
 protocol JCGraphMakerDelegate {
-	func graphIsComplete(graph: [String:[(node: JCGraphNode, weight: Double)]], withNodes: [String:JCGraphNode])
+	func graphIsComplete(graph: [String:[(node: JCGraphNode, weight: Double)]], with nodes: [String:JCGraphNode])
 }
 
 class JCGraphMaker{
 	
 	//Formatting Variable
-	let attractScale: Double = 0.0000006
-	let repulsScale: Double =  0.00005
-
+	let attractScale: Double = 0.0002
+	let repulsScale: Double =  0.02
+	
+	let max: Double = 5
+	let min: Double = -5
 	////////////
 	
 	
@@ -37,23 +39,31 @@ class JCGraphMaker{
 		var graph = [String:[(node: JCGraphNode, weight: Double)]]()
 		var nodes = [String:JCGraphNode]()
 		for name in adjList.keys{				//make friendNode out of each name
-			let newFriend = JCGraphNode(name: name, weight: Double(graph[name]!.count))
-			nodes["name"] = newFriend
-			graph["name"] = [(JCGraphNode, Double)]()
+			let weight = 0.08 + (0.003 * Double(adjList[name]!.count))	//weight represents number of people that connect to this node
+			let newNode = JCGraphNode(name: name, weight: weight)
+			newNode.max = max
+			newNode.min = min
+			nodes[name] = newNode
+			graph[name] = [(JCGraphNode, Double)]()
 		}
 		for name in adjList.keys{
-			for connection in adjList["name"]!{
-				graph["name"]!.append((nodes[connection.key]!,Double(connection.value)))
+			for connection in adjList[name]!{
+				graph[name]!.append((nodes[connection.key]!,Double(connection.value)))
 			}
 		}
 		
-		for _ in 0..<100{
-			applyPhysics(to: graph, with: nodes)
-		}
-		delegate?.graphIsComplete(graph: graph, withNodes: nodes)
+		initializeCoordinates(for: nodes, with: nodes["Jake Cronin"])
+		//for i in 0..<10{
+		//for _ in 0..<100{
+		//		applyPhysics(to: graph, with: nodes)
+		//	}
+		//	print("completed physics iteration \(i)")
+			delegate?.graphIsComplete(graph: graph, with: nodes)
+		//}
+		//print("all physics iterations completed")
 	}
-	fileprivate func initializeCoordinates(for nodes: [JCGraphNode], with center: JCGraphNode?){
-		for node in nodes{
+	fileprivate func initializeCoordinates(for nodes: [String:JCGraphNode], with center: JCGraphNode?){
+		for node in nodes.values{
 			node.x = rand()
 			node.y = rand()
 			node.z = rand()
@@ -72,7 +82,7 @@ class JCGraphMaker{
 			center!.updatePosition()
 		}
 	}
-	fileprivate func applyPhysics(to graph: [String:[(node: JCGraphNode, weight: Double)]], with nodes: [String:JCGraphNode]){
+	func applyPhysics(to graph: [String:[(node: JCGraphNode, weight: Double)]], with nodes: [String:JCGraphNode]){
 		for node in graph.keys{
 			for connection in graph[node]!{
 				applyEdgeForce(nodeA: nodes[node]!, nodeB: connection.node, weight: connection.weight)
@@ -97,20 +107,25 @@ class JCGraphMaker{
 		let dz = nodeA.z - nodeB.z
 		
 		let forceAttract = (dx * dx) + (dy * dy) + (dz * dz)	//separation distance squared
-		let separationDistance = sqrt(forceAttract)
-		if separationDistance == 0{
+		var separationDistance = sqrt(forceAttract)
+		if separationDistance <= 0{
 			return
+		}else if separationDistance < 0.000000001{
+			separationDistance = 0.000000001
 		}
 		
-		let scaledForce = forceAttract * attractScale * weight
+		var scaledForce = forceAttract * attractScale * (weight * 10)
+		if scaledForce > separationDistance{
+			scaledForce = separationDistance
+		}
 		
-		nodeA.dx = nodeA.dx + scaledForce * (dx / separationDistance)
-		nodeA.dy = nodeA.dy + scaledForce * (dy / separationDistance)
-		nodeA.dz = nodeA.dz + scaledForce * (dz / separationDistance)
+		nodeA.dx = nodeA.dx - scaledForce * (dx / separationDistance)
+		nodeA.dy = nodeA.dy - scaledForce * (dy / separationDistance)
+		nodeA.dz = nodeA.dz - scaledForce * (dz / separationDistance)
 		
-		nodeB.dx = nodeB.dx - scaledForce * (dx / separationDistance)
-		nodeB.dy = nodeB.dy - scaledForce * (dy / separationDistance)
-		nodeB.dz = nodeB.dz - scaledForce * (dz / separationDistance)
+		nodeB.dx = nodeB.dx + scaledForce * (dx / separationDistance)
+		nodeB.dy = nodeB.dy + scaledForce * (dy / separationDistance)
+		nodeB.dz = nodeB.dz + scaledForce * (dz / separationDistance)
 		
 	}
 	func applyNodeForce(nodeA: JCGraphNode, nodeB: JCGraphNode){
@@ -121,17 +136,22 @@ class JCGraphMaker{
 		
 		var separationDistance = sqrt((dx*dx) + (dy*dy) + (dz*dz))	//length of distance
 		
-		var repulsiveForce = repulsScale / separationDistance
+		//print("repulsive force: \(repulsScale) / \(separationDistance) = \(repulsiveForce)")
 		if separationDistance == 0{
-			separationDistance = 0.00000001
+			separationDistance = 0.000000001
 		}
+		
+		var repulsiveForce = repulsScale / separationDistance
 		if repulsiveForce.isNaN{
 			repulsiveForce = 0
 		}
 		if repulsiveForce.isInfinite{
 			repulsiveForce = Double.greatestFiniteMagnitude
 		}
-		
+		if repulsiveForce > 10{
+			repulsiveForce = 10
+		}
+
 		nodeA.dx = nodeA.dx + repulsiveForce * (dx / separationDistance) //cos(xyAngle)
 		nodeA.dy = nodeA.dy + repulsiveForce * (dy / separationDistance)//sin(xyAngle)
 		nodeA.dz = nodeA.dz + repulsiveForce * (dz / separationDistance)//cos(yzAngle)

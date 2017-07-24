@@ -19,7 +19,6 @@
 		633A193B1F12907700008D5A /* SceneKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 633A193A1F12907700008D5A /* SceneKit.framework */; };
 		633A193D1F129F3F00008D5A /* JCGraphMaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633A193C1F129F3F00008D5A /* JCGraphMaker.swift */; };
 		633A193F1F129F5000008D5A /* JCGraphNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633A193E1F129F5000008D5A /* JCGraphNode.swift */; };
-		633A19411F129FE300008D5A /* FriendNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633A19401F129FE300008D5A /* FriendNode.swift */; };
 		633A19431F12A06900008D5A /* JCGraphObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633A19421F12A06900008D5A /* JCGraphObject.swift */; };
 		63B9980D1F23D08F00AAF2F2 /* FacebookHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B9980C1F23D08F00AAF2F2 /* FacebookHandler.swift */; };
 		B53FFF7504CC1CB585AE8323 /* Pods_MyWebUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9577A7C060FE4E280CA270A8 /* Pods_MyWebUITests.framework */; };
@@ -65,7 +64,6 @@
 		633A193A1F12907700008D5A /* SceneKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SceneKit.framework; path = System/Library/Frameworks/SceneKit.framework; sourceTree = SDKROOT; };
 		633A193C1F129F3F00008D5A /* JCGraphMaker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JCGraphMaker.swift; sourceTree = "<group>"; };
 		633A193E1F129F5000008D5A /* JCGraphNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JCGraphNode.swift; sourceTree = "<group>"; };
-		633A19401F129FE300008D5A /* FriendNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FriendNode.swift; sourceTree = "<group>"; };
 		633A19421F12A06900008D5A /* JCGraphObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JCGraphObject.swift; sourceTree = "<group>"; };
 		63B9980C1F23D08F00AAF2F2 /* FacebookHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FacebookHandler.swift; sourceTree = "<group>"; };
 		73F81DB86FC3A1F32CD73535 /* Pods-MyWebUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MyWebUITests.release.xcconfig"; path = "Pods/Target Support Files/Pods-MyWebUITests/Pods-MyWebUITests.release.xcconfig"; sourceTree = "<group>"; };
@@ -133,7 +131,6 @@
 				633A18D21F11A20100008D5A /* LoginViewController.swift */,
 				633A18FE1F11A2F700008D5A /* NetworkViewController.swift */,
 				63B9980C1F23D08F00AAF2F2 /* FacebookHandler.swift */,
-				633A19401F129FE300008D5A /* FriendNode.swift */,
 				633A18D41F11A20100008D5A /* Main.storyboard */,
 				633A193C1F129F3F00008D5A /* JCGraphMaker.swift */,
 				633A193E1F129F5000008D5A /* JCGraphNode.swift */,
@@ -476,7 +473,6 @@
 				633A18D31F11A20100008D5A /* LoginViewController.swift in Sources */,
 				633A193D1F129F3F00008D5A /* JCGraphMaker.swift in Sources */,
 				633A19431F12A06900008D5A /* JCGraphObject.swift in Sources */,
-				633A19411F129FE300008D5A /* FriendNode.swift in Sources */,
 				633A18FF1F11A2F700008D5A /* NetworkViewController.swift in Sources */,
 				633A18D11F11A20100008D5A /* AppDelegate.swift in Sources */,
 			);

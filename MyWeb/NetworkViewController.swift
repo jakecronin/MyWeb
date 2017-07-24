@@ -11,13 +11,14 @@ import UIKit
 import FacebookCore
 import SceneKit
 import FBSDKCoreKit
+import OpenGLES
 
 
 class NetworkViewController: UIViewController{
 	
 	var myName = "Jake Cronin"
 	var names = [String: Int]()
-	var friends = [FriendNode]()
+	var friends = [JCGraphNode]()
 	
 	var unselectedColor = UIColor.green
 	var selectedColor = UIColor.blue
@@ -28,8 +29,11 @@ class NetworkViewController: UIViewController{
 	var cameraNode = SCNNode()
 	var lineArray = [SCNNode]()		//so I can remove them later
 	var nodeArray = [SCNNode]()		//so I can remove them later
-
 	
+	var friendsGraph: [String:[(node: JCGraphNode, weight: Double)]]?
+	var nodes: [String:JCGraphNode]?
+
+
 	override func viewDidLoad() {
 		print("network view controller loaded")
 		sceneSetup()
@@ -51,30 +55,23 @@ class NetworkViewController: UIViewController{
 		
 		sceneView.scene = scene
 	}
-
 	
-	//FIXME: MakeFriendObjectsFrom is deprecated, delete when you want
-	func makeFriendObjectsFrom(namesDictionary: Dictionary<String, Int>){
-		
-		friends = [FriendNode]()
-		let me = FriendNode(name: myName, weight: Double(namesDictionary[myName]!))
-		friends.append(me)
-		
-		for friend in namesDictionary.keys{
-			guard friend != myName else{
-				continue
-			}
-			let newFriend = FriendNode(name: friend, weight: Double(namesDictionary[friend]!))
-			newFriend.children.append(me)
-			me.children.append(newFriend)
-			friends.append(newFriend)
+	@IBAction func iteratePressed(sender: AnyObject){
+		guard friendsGraph != nil && nodes != nil else{
+			return
 		}
-		print("going to graph maker to design graph")
-		JCGraphMaker.sharedInstance.delegate = self
-		JCGraphMaker.sharedInstance.createGraphFrom(tree: me)
+		self.clearGraph()
+		for i in 0..<100{
+			JCGraphMaker.sharedInstance.applyPhysics(to: friendsGraph!, with: nodes!)
+			nodes![myName]!.centerNode()
+		}
+		for (i, value) in nodes!{
+			print("coodrinates point \(i): \(value.position)")
+		}
+		self.drawLinesForGraph(graph: friendsGraph!, with: nodes!)
+		self.drawNodes(nodes: nodes!)
 	}
-	
-}
+	}
 extension NetworkViewController: facebookHandlerDelegate{
 	func didGetMyProfile(profile: [String : Any]?) {
 		//
@@ -122,8 +119,8 @@ extension NetworkViewController{
 		//nodeArray.append(node)
 	}
 	func drawText(on node: JCGraphNode, text: String){
-		let myWord = SCNText(string: text, extrusionDepth: 0.03)
-		myWord.font = UIFont.systemFont(ofSize: 0.2)
+		let myWord = SCNText(string: text, extrusionDepth: CGFloat(node.radius/50))
+		myWord.font = UIFont.systemFont(ofSize: CGFloat(node.radius/10))
 		let wordNode = SCNNode(geometry: myWord)
 		var position = node.position
 		position.x = position.x - 1
@@ -134,50 +131,110 @@ extension NetworkViewController{
 	func drawLine(from: JCGraphNode, to: JCGraphNode, weight: Double){
 		let indices: [Int32] = [0, 1]
 		let source = SCNGeometrySource(vertices: [from.position, to.position], count: 2)
+		
 		let element = SCNGeometryElement(indices: indices, primitiveType: .line)
 		let lineNode = SCNNode(geometry: SCNGeometry(sources: [source], elements: [element]))
 		lineNode.geometry?.firstMaterial?.diffuse.contents = lineColor
 		sceneView.scene!.rootNode.addChildNode(lineNode)
 		lineArray.append(lineNode)
 	}
-	
-	func drawLinesForGraph(graph: [String:[(node: JCGraphNode, weight: Double)]]){
+	func drawCylinders(from: JCGraphNode, to: JCGraphNode, weight: Double){
+		//get coorinates of both nodes and calculate distance -> Height
+		//have radius be a function of width
+		//set position as midpoint
 		
+		//let cylinder = JCLineNode(parent: from, v1: from.position, v2: to.position, radius: CGFloat(weight * 0.1), radSegmentCount: 6)
+		let cylinder = makeCylinder(positionStart: from.position, positionEnd: to.position, radius: CGFloat(weight * 0.1), color: UIColor.white.cgColor)
+		sceneView.scene!.rootNode.addChildNode(cylinder)
 	}
-	func drawNodesForGraph(graph: [String:[(node: JCGraphNode, weight: Double)]]){
+	func makeCylinder(positionStart: SCNVector3, positionEnd: SCNVector3, radius: CGFloat , color: CGColor) -> SCNNode
+	{
+		let height = CGFloat(GLKVector3Distance(SCNVector3ToGLKVector3(positionStart), SCNVector3ToGLKVector3(positionEnd)))
+		let startNode = SCNNode()
+		let endNode = SCNNode()
 		
-	}
-	
-	//FIXME: Deprecated for tree, aka noncyclical graph
-	func drawLinesForTree(graph: JCTreeGraph){
-		for node in lineArray{
-			node.removeFromParentNode()
+		startNode.position = positionStart
+		endNode.position = positionEnd
+		
+		let zAxisNode = SCNNode()
+		zAxisNode.eulerAngles.x = Float(CGFloat(M_PI_2))
+		
+		let cylinderGeometry = SCNCylinder(radius: radius, height: height)
+		cylinderGeometry.firstMaterial?.diffuse.contents = color
+		let cylinder = SCNNode(geometry: cylinderGeometry)
+		
+		cylinder.position.y = Float(-height/2)
+		zAxisNode.addChildNode(cylinder)
+		
+		let returnNode = SCNNode()
+		
+		if (positionStart.x > 0.0 && positionStart.y < 0.0 && positionStart.z < 0.0 && positionEnd.x > 0.0 && positionEnd.y < 0.0 && positionEnd.z > 0.0)
+		{
+			endNode.addChildNode(zAxisNode)
+			endNode.constraints = [ SCNLookAtConstraint(target: startNode) ]
+			returnNode.addChildNode(endNode)
+			
 		}
-		for node in graph.adjacents.keys{
-			for child in node.children{
-				drawLine(from: node, to: child, weight: 0)
+		else if (positionStart.x < 0.0 && positionStart.y < 0.0 && positionStart.z < 0.0 && positionEnd.x < 0.0 && positionEnd.y < 0.0 && positionEnd.z > 0.0)
+		{
+			endNode.addChildNode(zAxisNode)
+			endNode.constraints = [ SCNLookAtConstraint(target: startNode) ]
+			returnNode.addChildNode(endNode)
+			
+		}
+		else if (positionStart.x < 0.0 && positionStart.y > 0.0 && positionStart.z < 0.0 && positionEnd.x < 0.0 && positionEnd.y > 0.0 && positionEnd.z > 0.0)
+		{
+			endNode.addChildNode(zAxisNode)
+			endNode.constraints = [ SCNLookAtConstraint(target: startNode) ]
+			returnNode.addChildNode(endNode)
+			
+		}
+		else if (positionStart.x > 0.0 && positionStart.y > 0.0 && positionStart.z < 0.0 && positionEnd.x > 0.0 && positionEnd.y > 0.0 && positionEnd.z > 0.0)
+		{
+			endNode.addChildNode(zAxisNode)
+			endNode.constraints = [ SCNLookAtConstraint(target: startNode) ]
+			returnNode.addChildNode(endNode)
+			
+		}
+		else
+		{
+			startNode.addChildNode(zAxisNode)
+			startNode.constraints = [ SCNLookAtConstraint(target: endNode) ]
+			returnNode.addChildNode(startNode)
+		}
+		
+		return returnNode
+	}
+	
+	func drawLinesForGraph(graph: [String:[(node: JCGraphNode, weight: Double)]], with nodes: [String:JCGraphNode]){
+		for name in nodes.keys{
+			for connection in graph[name]!{
+				//drawLine(from: nodes[name]!, to: connection.node, weight: connection.weight)
+				drawCylinders(from: nodes[name]!, to: connection.node, weight: connection.weight)
 			}
 		}
 	}
-	func drawNodesForTree(graph: JCTreeGraph){
-		for node in graph.adjacents.keys{
+	func drawNodes(nodes: [String:JCGraphNode]){
+		for node in nodes.values{
 			drawNode(node: node)
-			if let friend = node as? FriendNode{
-				guard let name = friend.friendName else{
-					print("no name")
-					continue
-				}
-				drawText(on: node, text: name)
-			}
+			drawText(on: node, text: node.name!)
+		}
+	}
+	func clearGraph(){
+		for node in sceneView.scene!.rootNode.childNodes{
+			node.removeFromParentNode()
 		}
 	}
 }
-
 extension NetworkViewController: JCGraphMakerDelegate{
-	func graphIsComplete(graph: [String:[(node: JCGraphNode, weight: Double)]], withNodes: [String:JCGraphNode]){
+	func graphIsComplete(graph: [String:[(node: JCGraphNode, weight: Double)]], with nodes: [String:JCGraphNode]){
+		self.clearGraph()
 		print("graph is complete, going to draw it")
-		drawLinesForGraph(graph: graph)
-		drawNodesForGraph(graph: graph)
+		self.drawLinesForGraph(graph: graph, with: nodes)
+		self.drawNodes(nodes: nodes)
+		self.nodes = nodes
+		self.friendsGraph = graph
+		print("finished drawing, nodes: \(sceneView.scene!.rootNode.childNodes.count)")
 	}
 }
 

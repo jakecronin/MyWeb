@@ -30,8 +30,8 @@ class FacebookHandler{
 	
 	fileprivate var photoOffsetIndex = 0			//tells photoRequest what offset to use
 	fileprivate var photoRequestCompletionCount = 0	//tells photoRequestContinue how many requests have finished
-	fileprivate var photoRequestsToMake = 5			//tells photoRequestContinue how many requests to wait for
-	fileprivate var photoRequestSize = 100			//limit for photo request thing
+	fileprivate var photoRequestsToMake = 1			//tells photoRequestContinue how many requests to wait for
+	fileprivate var photoRequestSize = 1			//limit for photo request thing
 	
 	fileprivate var photosPaged: Int!
 	
