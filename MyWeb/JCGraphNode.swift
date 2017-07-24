@@ -14,6 +14,8 @@ class JCGraphNode: SCNNode{
 	
 	//coordinates
 	
+	var selected = false
+	
 	var x: Double = 0
 	var y: Double = 0
 	var z: Double = 0

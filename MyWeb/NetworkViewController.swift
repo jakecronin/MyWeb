@@ -26,9 +26,11 @@ class NetworkViewController: UIViewController{
 	var cameraOrigin = SCNVector3Make(0, 0, 20)
 	
 	@IBOutlet weak var sceneView: SCNView!
+	@IBOutlet weak var collectionView: UICollectionView!
+	
+	
 	var cameraNode = SCNNode()
-	var lineArray = [SCNNode]()		//so I can remove them later
-	var nodeArray = [SCNNode]()		//so I can remove them later
+	var selectedNode: JCGraphNode?
 	
 	var friendsGraph: [String:[(node: JCGraphNode, weight: Double)]]?
 	var nodes: [String:JCGraphNode]?
@@ -53,9 +55,43 @@ class NetworkViewController: UIViewController{
 		sceneView.showsStatistics = true
 		sceneView.backgroundColor = UIColor.black
 		
+		let tapRecognizer = UITapGestureRecognizer(target: self, action:  #selector(NetworkViewController.tapRecognizer(_:)))
+		tapRecognizer.numberOfTapsRequired = 1
+		sceneView.addGestureRecognizer(tapRecognizer)
+		tapRecognizer.cancelsTouchesInView = false
+		
 		sceneView.scene = scene
 	}
-	
+	func tapRecognizer(_ sender: UITapGestureRecognizer){
+		let location = sender.location(in: sceneView)
+		let hitResults = sceneView.hitTest(location, options: nil)
+		if hitResults.count > 0{
+			let result = hitResults[0]
+			//if let node = result.node.
+			guard let node = result.node as? JCGraphNode else{
+				print("hit node, but it returned nil")
+				return
+			}
+			nodeSelected(node: node)
+		}
+	}
+	func nodeSelected(node: JCGraphNode){
+		if node.selected{	//already was selectedNode
+			selectedNode = nil
+			nodeUnselected(node: node)
+		}else{	//node tapped
+			if selectedNode != nil{
+				nodeUnselected(node: selectedNode!)
+			}
+			selectedNode = node
+			node.selected = true
+			node.geometry?.firstMaterial?.diffuse.contents = selectedColor
+		}
+	}
+	func nodeUnselected(node: JCGraphNode){
+		node.selected = false
+		node.geometry?.firstMaterial?.diffuse.contents = unselectedColor
+	}
 	@IBAction func iteratePressed(sender: AnyObject){
 		guard friendsGraph != nil && nodes != nil else{
 			return
@@ -71,7 +107,26 @@ class NetworkViewController: UIViewController{
 		self.drawLinesForGraph(graph: friendsGraph!, with: nodes!)
 		self.drawNodes(nodes: nodes!)
 	}
+}
+extension NetworkViewController: UICollectionViewDelegate{
+	func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+		//
 	}
+}
+extension NetworkViewController: UICollectionViewDataSource{
+	func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+		return UICollectionViewCell()
+	}
+	func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+		//
+	}
+	func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+		return 1
+	}
+}
+extension NetworkViewController: UICollectionViewDelegateFlowLayout{
+	
+}
 extension NetworkViewController: facebookHandlerDelegate{
 	func didGetMyProfile(profile: [String : Any]?) {
 		//
@@ -109,9 +164,6 @@ extension NetworkViewController: facebookHandlerDelegate{
 extension NetworkViewController{
 	//MARK: Draw Functions
 	func drawNode(node: JCGraphNode){
-		for node in nodeArray{
-			node.removeFromParentNode()
-		}
 		node.geometry = SCNSphere(radius: CGFloat(node.radius))
 		node.position = SCNVector3Make(Float(node.x), Float(node.y), Float(node.z))
 		node.geometry?.firstMaterial?.diffuse.contents = unselectedColor
@@ -136,19 +188,13 @@ extension NetworkViewController{
 		let lineNode = SCNNode(geometry: SCNGeometry(sources: [source], elements: [element]))
 		lineNode.geometry?.firstMaterial?.diffuse.contents = lineColor
 		sceneView.scene!.rootNode.addChildNode(lineNode)
-		lineArray.append(lineNode)
 	}
 	func drawCylinders(from: JCGraphNode, to: JCGraphNode, weight: Double){
-		//get coorinates of both nodes and calculate distance -> Height
-		//have radius be a function of width
-		//set position as midpoint
-		
-		//let cylinder = JCLineNode(parent: from, v1: from.position, v2: to.position, radius: CGFloat(weight * 0.1), radSegmentCount: 6)
-		let cylinder = makeCylinder(positionStart: from.position, positionEnd: to.position, radius: CGFloat(weight * 0.1), color: UIColor.white.cgColor)
+		let radius = CGFloat(0.01 + (weight * 0.005))
+		let cylinder = makeCylinder(positionStart: from.position, positionEnd: to.position, radius: radius, color: UIColor.white.cgColor)
 		sceneView.scene!.rootNode.addChildNode(cylinder)
 	}
-	func makeCylinder(positionStart: SCNVector3, positionEnd: SCNVector3, radius: CGFloat , color: CGColor) -> SCNNode
-	{
+	func makeCylinder(positionStart: SCNVector3, positionEnd: SCNVector3, radius: CGFloat , color: CGColor) -> SCNNode{
 		let height = CGFloat(GLKVector3Distance(SCNVector3ToGLKVector3(positionStart), SCNVector3ToGLKVector3(positionEnd)))
 		let startNode = SCNNode()
 		let endNode = SCNNode()
@@ -237,4 +283,3 @@ extension NetworkViewController: JCGraphMakerDelegate{
 		print("finished drawing, nodes: \(sceneView.scene!.rootNode.childNodes.count)")
 	}
 }
-
