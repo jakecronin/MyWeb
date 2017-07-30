@@ -9,7 +9,7 @@
 import Foundation
 
 protocol JCGraphMakerDelegate {
-	func graphIsComplete(graph: [String:[(node: JCGraphNode, weight: Double)]], with nodes: [String:JCGraphNode])
+	func graphIsComplete(graph: JCGraph)
 }
 
 class JCGraphMaker{
@@ -22,45 +22,38 @@ class JCGraphMaker{
 	let min: Double = -5
 	////////////
 	
-	
 	static let sharedInstance = JCGraphMaker()
 	var delegate: JCGraphMakerDelegate?
-	var graph: JCTreeGraph!
 	
-	func createGraphFrom(tree: JCGraphNode){
-		graph = JCTreeGraph(with: tree)
-		initializeCoordinates(for: tree)
-		for _ in 0..<100{
-			iterateAndUpdateTree()
-		}
-		//delegate?.graphIsComplete(graph: graph)
-	}
-	func createGraphFrom(adjList: [String:[String: Int]]){
-		var graph = [String:[(node: JCGraphNode, weight: Double)]]()
-		var nodes = [String:JCGraphNode]()
-		for name in adjList.keys{				//make friendNode out of each name
-			let weight = 0.08 + (0.003 * Double(adjList[name]!.count))	//weight represents number of people that connect to this node
-			let newNode = JCGraphNode(name: name, weight: weight)
+	
+	func createGraphFrom(connections: [String:[String: [String]?]]){
+		//recieve list with [name-> [name of connection ->[id of photos]]
+		var adjList = [String:[JCGraphNode]]()	//relating person name to neighboring nodes
+		var nodes = [String:JCGraphNode]()		//relating person name to a node
+		var lines = [JCGraphLine]()
+		var center: JCGraphNode?
+		
+		for friend in connections{	//make friendNode out of each name
+			let weight = 0.08 + (0.003 * Double(friend.value.count))	//weight represents number of people that connect to this node
+			let newNode = JCGraphNode(name: friend.key, weight: weight)
 			newNode.max = max
 			newNode.min = min
-			nodes[name] = newNode
-			graph[name] = [(JCGraphNode, Double)]()
+			nodes[friend.key] = newNode
+			adjList[friend.key] = [JCGraphNode]()
 		}
-		for name in adjList.keys{
-			for connection in adjList[name]!{
-				graph[name]!.append((nodes[connection.key]!,Double(connection.value)))
+		for node in nodes{	//for each friend's connection dictionary
+			for connection in connections[node.key]!{	//for each connection dictionary to photo id array
+				let nodeB = nodes[connection.key]!
+				adjList[node.key]!.append(nodeB)
+				let ids = connection.value
+				lines.append(JCGraphLine(nodeA: node.value, nodeB: nodeB, ids: ids))
 			}
 		}
+		var graph = JCGraph(adjList: adjList, nodes: nodes, lines: lines)
+		graph.center = graph.nodes["Jake Cronin"]
+		initializeCoordinates(for: nodes, with: graph.center!)
 		
-		initializeCoordinates(for: nodes, with: nodes["Jake Cronin"])
-		//for i in 0..<10{
-		//for _ in 0..<100{
-		//		applyPhysics(to: graph, with: nodes)
-		//	}
-		//	print("completed physics iteration \(i)")
-			delegate?.graphIsComplete(graph: graph, with: nodes)
-		//}
-		//print("all physics iterations completed")
+		delegate?.graphIsComplete(graph: graph)
 	}
 	fileprivate func initializeCoordinates(for nodes: [String:JCGraphNode], with center: JCGraphNode?){
 		for node in nodes.values{
@@ -82,17 +75,20 @@ class JCGraphMaker{
 			center!.updatePosition()
 		}
 	}
-	func applyPhysics(to graph: [String:[(node: JCGraphNode, weight: Double)]], with nodes: [String:JCGraphNode]){
-		for node in graph.keys{
-			for connection in graph[node]!{
-				applyEdgeForce(nodeA: nodes[node]!, nodeB: connection.node, weight: connection.weight)
-			}
-			for otherNode in nodes.values{
-				applyNodeForce(nodeA: nodes[node]!, nodeB: otherNode)
+	func applyPhysics(to graph: JCGraph){
+		for line in graph.lines{
+			applyEdgeForce(nodeA: line.nodeA, nodeB: line.nodeB, weight: line.weight)
+		}
+		for nodeA in graph.nodes{
+			for nodeB in graph.nodes{
+				applyNodeForce(nodeA: nodeA.value, nodeB: nodeB.value)
 			}
 		}
-		for node in nodes.values{
-			node.updatePosition()
+		for node in graph.nodes{
+			node.value.updatePosition()
+			if node.value.name == "Jake Cronin"{
+				node.value.centerNode()
+			}
 		}
 	}
 	
@@ -163,47 +159,16 @@ class JCGraphMaker{
 	}
 
 	//FIXME: Note, these tree functions are now deprecated
-	fileprivate func initializeCoordinates(for tree: JCGraphNode){	//calculate positions of nodes
-		//Initialize other nodes at random coordinates
-		for node in graph.adjacents.keys{
-			node.x = rand()
-			node.y = rand()
-			node.z = rand()
-			
-			node.dz = 0
-			node.dy = 0
-			node.dx = 0
-			
-			node.updatePosition()
-		}
-		
-		tree.dx = 0
-		tree.dy = 0
-		tree.dz = 0
-		
-		tree.x = 0
-		tree.y = 0
-		tree.z = 0
-		
-		tree.radius = 1
-		
-		
-	}
 	fileprivate func rand() -> Double{
 		return (drand48() - 0.5) * 10
 	}
-	fileprivate func iterateAndUpdateTree(){
-		for node in graph.adjacents.keys{
-			for rec in node.children{
-				applyEdgeForce(nodeA: node, nodeB: rec, weight: 1)
-			}
-			for otherNode in graph.adjacents.keys{
-				applyNodeForce(nodeA: node, nodeB: otherNode)
-			}
-		}
-		for node in graph.adjacents.keys{
-			node.updatePosition()
-		}
-		graph.center.centerNode()
-	}
+
+
 }
+
+
+
+
+
+
+

@@ -17,8 +17,6 @@ import OpenGLES
 class NetworkViewController: UIViewController{
 	
 	var myName = "Jake Cronin"
-	var names = [String: Int]()
-	var friends = [JCGraphNode]()
 	
 	var unselectedColor = UIColor.green
 	var selectedColor = UIColor.blue
@@ -28,12 +26,10 @@ class NetworkViewController: UIViewController{
 	@IBOutlet weak var sceneView: SCNView!
 	@IBOutlet weak var collectionView: UICollectionView!
 	
-	
 	var cameraNode = SCNNode()
 	var selectedNode: JCGraphNode?
 	
-	var friendsGraph: [String:[(node: JCGraphNode, weight: Double)]]?
-	var nodes: [String:JCGraphNode]?
+	var friendsGraph: JCGraph?
 
 
 	override func viewDidLoad() {
@@ -41,8 +37,6 @@ class NetworkViewController: UIViewController{
 		sceneSetup()
 		let facebookHandler = FacebookHandler()
 		facebookHandler.getAllPhotos(delegate: self)	//graph greated in didGetAllPhotosDelegate
-		//get coordinates for nodes in graph (JCGraphMaker)
-		//draw graph
 	}
 	func sceneSetup(){
 		let scene = SCNScene()
@@ -68,12 +62,17 @@ class NetworkViewController: UIViewController{
 		if hitResults.count > 0{
 			let result = hitResults[0]
 			//if let node = result.node.
-			guard let node = result.node as? JCGraphNode else{
-				print("hit node, but it returned nil")
+			if let node = result.node as? JCGraphNode{
+				nodeSelected(node: node)
 				return
+			}else if let line = result.node as? JCGraphLine{
+				lineSelected(line: line)
 			}
-			nodeSelected(node: node)
 		}
+	}
+	func lineSelected(line: JCGraphLine){
+		line.geometry?.firstMaterial?.diffuse.contents = UIColor.orange
+		print("ids: \(line.ids)")
 	}
 	func nodeSelected(node: JCGraphNode){
 		if node.selected{	//already was selectedNode
@@ -93,19 +92,17 @@ class NetworkViewController: UIViewController{
 		node.geometry?.firstMaterial?.diffuse.contents = unselectedColor
 	}
 	@IBAction func iteratePressed(sender: AnyObject){
-		guard friendsGraph != nil && nodes != nil else{
+		guard friendsGraph != nil else{
 			return
 		}
 		self.clearGraph()
 		for i in 0..<100{
-			JCGraphMaker.sharedInstance.applyPhysics(to: friendsGraph!, with: nodes!)
-			nodes![myName]!.centerNode()
+			JCGraphMaker.sharedInstance.applyPhysics(to: friendsGraph!)
 		}
-		for (i, value) in nodes!{
-			print("coodrinates point \(i): \(value.position)")
-		}
-		self.drawLinesForGraph(graph: friendsGraph!, with: nodes!)
-		self.drawNodes(nodes: nodes!)
+		friendsGraph?.nodes["Jake Cronin"]!.centerNode()
+		self.drawNodes(nodes: friendsGraph!.nodes)
+		self.drawLines(lines: friendsGraph!.lines)
+
 	}
 }
 extension NetworkViewController: UICollectionViewDelegate{
@@ -136,29 +133,30 @@ extension NetworkViewController: facebookHandlerDelegate{
 		guard photos != nil else{
 			return
 		}
-		var graph = [String:[String: Int]]()
-		for photo in photos!.values{
-			for name in photo{
+		//Build adjacency list out of photos by names of tagged users. Intersection is list of id's
+		var graph = [String:[String: [String]]]() //name -> name:[photo ID]
+		for photo in photos!{
+			for name in photo.value{
 				if graph[name] == nil{
-					graph[name] = [String: Int]()
+					graph[name] = [String: [String]]()
 				}
 				/*Go through all other tagged
 				people in photo and insert them or increment their counter*/
-				for tagged in photo{
+				for tagged in photo.value{
 					guard tagged != name else{
 						continue
 					}
 					if graph[name]![tagged] == nil{
-						graph[name]![tagged] = 1
+						graph[name]![tagged] = [photo.key]
 					}else{
-						graph[name]![tagged] = graph[name]![tagged]! + 1
+						graph[name]![tagged]!.append(photo.key)
 					}
 				}
 			}
 		}
 		print("\n\nall the names \(graph.keys.count): \(graph)")
 		JCGraphMaker.sharedInstance.delegate = self
-		JCGraphMaker.sharedInstance.createGraphFrom(adjList: graph)
+		JCGraphMaker.sharedInstance.createGraphFrom(connections: graph)
 	}
 }
 extension NetworkViewController{
@@ -180,25 +178,16 @@ extension NetworkViewController{
 		wordNode.position = position
 		sceneView.scene!.rootNode.addChildNode(wordNode)
 	}
-	func drawLine(from: JCGraphNode, to: JCGraphNode, weight: Double){
-		let indices: [Int32] = [0, 1]
-		let source = SCNGeometrySource(vertices: [from.position, to.position], count: 2)
+	func drawCylinder(with line: JCGraphLine) -> SCNNode{
 		
-		let element = SCNGeometryElement(indices: indices, primitiveType: .line)
-		let lineNode = SCNNode(geometry: SCNGeometry(sources: [source], elements: [element]))
-		lineNode.geometry?.firstMaterial?.diffuse.contents = lineColor
-		sceneView.scene!.rootNode.addChildNode(lineNode)
-	}
-	func drawCylinders(from: JCGraphNode, to: JCGraphNode, weight: Double){
-		let radius = CGFloat(0.01 + (weight * 0.005))
-		let cylinder = makeCylinder(positionStart: from.position, positionEnd: to.position, radius: radius, color: UIColor.white.cgColor)
-		sceneView.scene!.rootNode.addChildNode(cylinder)
-	}
-	func makeCylinder(positionStart: SCNVector3, positionEnd: SCNVector3, radius: CGFloat , color: CGColor) -> SCNNode{
+		let positionStart = line.nodeA.position
+		let positionEnd = line.nodeB.position
+		
+		let radius = CGFloat(0.01 + (line.weight * 0.005))
 		let height = CGFloat(GLKVector3Distance(SCNVector3ToGLKVector3(positionStart), SCNVector3ToGLKVector3(positionEnd)))
+		
 		let startNode = SCNNode()
 		let endNode = SCNNode()
-		
 		startNode.position = positionStart
 		endNode.position = positionEnd
 		
@@ -206,58 +195,63 @@ extension NetworkViewController{
 		zAxisNode.eulerAngles.x = Float(CGFloat(M_PI_2))
 		
 		let cylinderGeometry = SCNCylinder(radius: radius, height: height)
-		cylinderGeometry.firstMaterial?.diffuse.contents = color
+		cylinderGeometry.firstMaterial?.diffuse.contents = UIColor.cyan
 		let cylinder = SCNNode(geometry: cylinderGeometry)
 		
 		cylinder.position.y = Float(-height/2)
 		zAxisNode.addChildNode(cylinder)
 		
-		let returnNode = SCNNode()
+		var returnNode = line
+		for node in returnNode.childNodes{
+			node.removeFromParentNode()
+		}
 		
-		if (positionStart.x > 0.0 && positionStart.y < 0.0 && positionStart.z < 0.0 && positionEnd.x > 0.0 && positionEnd.y < 0.0 && positionEnd.z > 0.0)
-		{
+		if (positionStart.x > 0.0 && positionStart.y < 0.0 && positionStart.z < 0.0 && positionEnd.x > 0.0 && positionEnd.y < 0.0 && positionEnd.z > 0.0){
 			endNode.addChildNode(zAxisNode)
 			endNode.constraints = [ SCNLookAtConstraint(target: startNode) ]
 			returnNode.addChildNode(endNode)
 			
-		}
-		else if (positionStart.x < 0.0 && positionStart.y < 0.0 && positionStart.z < 0.0 && positionEnd.x < 0.0 && positionEnd.y < 0.0 && positionEnd.z > 0.0)
-		{
+		}else if (positionStart.x < 0.0 && positionStart.y < 0.0 && positionStart.z < 0.0 && positionEnd.x < 0.0 && positionEnd.y < 0.0 && positionEnd.z > 0.0){
 			endNode.addChildNode(zAxisNode)
 			endNode.constraints = [ SCNLookAtConstraint(target: startNode) ]
 			returnNode.addChildNode(endNode)
 			
-		}
-		else if (positionStart.x < 0.0 && positionStart.y > 0.0 && positionStart.z < 0.0 && positionEnd.x < 0.0 && positionEnd.y > 0.0 && positionEnd.z > 0.0)
-		{
+		}else if (positionStart.x < 0.0 && positionStart.y > 0.0 && positionStart.z < 0.0 && positionEnd.x < 0.0 && positionEnd.y > 0.0 && positionEnd.z > 0.0){
 			endNode.addChildNode(zAxisNode)
 			endNode.constraints = [ SCNLookAtConstraint(target: startNode) ]
 			returnNode.addChildNode(endNode)
 			
-		}
-		else if (positionStart.x > 0.0 && positionStart.y > 0.0 && positionStart.z < 0.0 && positionEnd.x > 0.0 && positionEnd.y > 0.0 && positionEnd.z > 0.0)
-		{
+		}else if (positionStart.x > 0.0 && positionStart.y > 0.0 && positionStart.z < 0.0 && positionEnd.x > 0.0 && positionEnd.y > 0.0 && positionEnd.z > 0.0){
 			endNode.addChildNode(zAxisNode)
 			endNode.constraints = [ SCNLookAtConstraint(target: startNode) ]
 			returnNode.addChildNode(endNode)
 			
-		}
-		else
-		{
+		}else{
 			startNode.addChildNode(zAxisNode)
 			startNode.constraints = [ SCNLookAtConstraint(target: endNode) ]
 			returnNode.addChildNode(startNode)
 		}
-		
+		sceneView.scene!.rootNode.addChildNode(returnNode)
+		print("drew line at position \(cylinder.position)")
 		return returnNode
 	}
+
+	/*func drawLine(line: JCGraphLine){
+		let indices: [Int32] = [0, 1]
+		let from = line.nodeA
+		let to = line.nodeB
+		let weight = line.weight
+		let source = SCNGeometrySource(vertices: [from.position, to.position], count: 2)
+		
+		let element = SCNGeometryElement(indices: indices, primitiveType: .line)
+		let lineNode = SCNNode(geometry: SCNGeometry(sources: [source], elements: [element]))
+		lineNode.geometry?.firstMaterial?.diffuse.contents = lineColor
+		sceneView.scene!.rootNode.addChildNode(lineNode)
+	}*/
 	
-	func drawLinesForGraph(graph: [String:[(node: JCGraphNode, weight: Double)]], with nodes: [String:JCGraphNode]){
-		for name in nodes.keys{
-			for connection in graph[name]!{
-				//drawLine(from: nodes[name]!, to: connection.node, weight: connection.weight)
-				drawCylinders(from: nodes[name]!, to: connection.node, weight: connection.weight)
-			}
+	func drawLines(lines: [JCGraphLine]){
+		for line in lines{
+			drawCylinder(with: line)
 		}
 	}
 	func drawNodes(nodes: [String:JCGraphNode]){
@@ -273,12 +267,11 @@ extension NetworkViewController{
 	}
 }
 extension NetworkViewController: JCGraphMakerDelegate{
-	func graphIsComplete(graph: [String:[(node: JCGraphNode, weight: Double)]], with nodes: [String:JCGraphNode]){
+	func graphIsComplete(graph: JCGraph){
 		self.clearGraph()
-		print("graph is complete, going to draw it")
-		self.drawLinesForGraph(graph: graph, with: nodes)
-		self.drawNodes(nodes: nodes)
-		self.nodes = nodes
+		
+		self.drawLines(lines: graph.lines)
+		self.drawNodes(nodes: graph.nodes)
 		self.friendsGraph = graph
 		print("finished drawing, nodes: \(sceneView.scene!.rootNode.childNodes.count)")
 	}
