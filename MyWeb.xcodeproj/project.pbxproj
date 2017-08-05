@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		53EB43D6BC0993CC658D8F79 /* Pods_MyWebTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 470C9FA7F281C8EF0962C096 /* Pods_MyWebTests.framework */; };
 		632580FA1F2D44BF004DC4F9 /* JCGraphLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632580F91F2D44BF004DC4F9 /* JCGraphLine.swift */; };
+		632580FC1F2E9A23004DC4F9 /* ImageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632580FB1F2E9A23004DC4F9 /* ImageCell.swift */; };
 		633A18D11F11A20100008D5A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633A18D01F11A20100008D5A /* AppDelegate.swift */; };
 		633A18D31F11A20100008D5A /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633A18D21F11A20100008D5A /* LoginViewController.swift */; };
 		633A18D61F11A20100008D5A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 633A18D41F11A20100008D5A /* Main.storyboard */; };
@@ -21,6 +22,7 @@
 		633A193D1F129F3F00008D5A /* JCGraphMaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633A193C1F129F3F00008D5A /* JCGraphMaker.swift */; };
 		633A193F1F129F5000008D5A /* JCGraphNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633A193E1F129F5000008D5A /* JCGraphNode.swift */; };
 		633A19431F12A06900008D5A /* JCGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633A19421F12A06900008D5A /* JCGraph.swift */; };
+		63961D421F364A7E00068FA5 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63961D411F364A7E00068FA5 /* Extensions.swift */; };
 		63B9980D1F23D08F00AAF2F2 /* FacebookHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B9980C1F23D08F00AAF2F2 /* FacebookHandler.swift */; };
 		B53FFF7504CC1CB585AE8323 /* Pods_MyWebUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9577A7C060FE4E280CA270A8 /* Pods_MyWebUITests.framework */; };
 		E22EEE35D0D7AF0726D7107E /* Pods_MyWeb.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D91DD4D22C04C6B36B44ADA /* Pods_MyWeb.framework */; };
@@ -49,6 +51,7 @@
 		3D91DD4D22C04C6B36B44ADA /* Pods_MyWeb.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MyWeb.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		470C9FA7F281C8EF0962C096 /* Pods_MyWebTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MyWebTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		632580F91F2D44BF004DC4F9 /* JCGraphLine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JCGraphLine.swift; sourceTree = "<group>"; };
+		632580FB1F2E9A23004DC4F9 /* ImageCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageCell.swift; sourceTree = "<group>"; };
 		633A18CD1F11A20100008D5A /* MyWeb.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyWeb.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		633A18D01F11A20100008D5A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		633A18D21F11A20100008D5A /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
@@ -67,6 +70,7 @@
 		633A193C1F129F3F00008D5A /* JCGraphMaker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JCGraphMaker.swift; sourceTree = "<group>"; };
 		633A193E1F129F5000008D5A /* JCGraphNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JCGraphNode.swift; sourceTree = "<group>"; };
 		633A19421F12A06900008D5A /* JCGraph.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JCGraph.swift; sourceTree = "<group>"; };
+		63961D411F364A7E00068FA5 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		63B9980C1F23D08F00AAF2F2 /* FacebookHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FacebookHandler.swift; sourceTree = "<group>"; };
 		73F81DB86FC3A1F32CD73535 /* Pods-MyWebUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MyWebUITests.release.xcconfig"; path = "Pods/Target Support Files/Pods-MyWebUITests/Pods-MyWebUITests.release.xcconfig"; sourceTree = "<group>"; };
 		9577A7C060FE4E280CA270A8 /* Pods_MyWebUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MyWebUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -134,6 +138,7 @@
 				633A18FE1F11A2F700008D5A /* NetworkViewController.swift */,
 				63B9980C1F23D08F00AAF2F2 /* FacebookHandler.swift */,
 				633A18D41F11A20100008D5A /* Main.storyboard */,
+				632580FB1F2E9A23004DC4F9 /* ImageCell.swift */,
 				633A193C1F129F3F00008D5A /* JCGraphMaker.swift */,
 				633A193E1F129F5000008D5A /* JCGraphNode.swift */,
 				633A19421F12A06900008D5A /* JCGraph.swift */,
@@ -141,6 +146,7 @@
 				633A18D71F11A20100008D5A /* Assets.xcassets */,
 				633A18D91F11A20100008D5A /* LaunchScreen.storyboard */,
 				633A18DC1F11A20100008D5A /* Info.plist */,
+				63961D411F364A7E00068FA5 /* Extensions.swift */,
 			);
 			path = MyWeb;
 			sourceTree = "<group>";
@@ -473,8 +479,10 @@
 			files = (
 				63B9980D1F23D08F00AAF2F2 /* FacebookHandler.swift in Sources */,
 				633A193F1F129F5000008D5A /* JCGraphNode.swift in Sources */,
+				632580FC1F2E9A23004DC4F9 /* ImageCell.swift in Sources */,
 				633A18D31F11A20100008D5A /* LoginViewController.swift in Sources */,
 				632580FA1F2D44BF004DC4F9 /* JCGraphLine.swift in Sources */,
+				63961D421F364A7E00068FA5 /* Extensions.swift in Sources */,
 				633A193D1F129F3F00008D5A /* JCGraphMaker.swift in Sources */,
 				633A19431F12A06900008D5A /* JCGraph.swift in Sources */,
 				633A18FF1F11A2F700008D5A /* NetworkViewController.swift in Sources */,
