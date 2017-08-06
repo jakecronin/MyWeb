@@ -24,9 +24,10 @@ class NetworkViewController: UIViewController{
 	var lineSelectedColor = UIColor.orange
 	var cameraOrigin = SCNVector3Make(0, 0, 20)
 	
+	var showNameLabels = false
+	
 	@IBOutlet weak var sceneView: SCNView!
 	@IBOutlet weak var collectionView: UICollectionView!
-	
 	
 	@IBOutlet weak var profileView: UIView!
 	@IBOutlet weak var profPic: UIImageView!
@@ -66,6 +67,9 @@ class NetworkViewController: UIViewController{
 		FacebookHandler.getMyProfile(delegate: self)
 		let facebookHandler = FacebookHandler()
 		facebookHandler.getAllPhotos(delegate: self)	//graph greated in didGetAllPhotosDelegate
+	}
+	override func viewWillAppear(_ animated: Bool) {
+		refreshPressed(sender: nil)
 	}
 	func sceneSetup(){
 		let scene = SCNScene()
@@ -209,7 +213,7 @@ class NetworkViewController: UIViewController{
 		}
 	}
 	
-	@IBAction func refreshPressed(sender: AnyObject){
+	@IBAction func refreshPressed(sender: AnyObject?){
 		guard friendsGraph != nil else{
 			return
 		}
@@ -236,29 +240,21 @@ class NetworkViewController: UIViewController{
 		}
 	}
 	
-	@IBAction func imageTapped(imageView: UIImageView) {
-		let newImageView = UIImageView(image: imageView.image)
-		newImageView.frame = UIScreen.main.bounds
-		newImageView.backgroundColor = UIColor.black
-		newImageView.contentMode = .scaleAspectFit
-		newImageView.isUserInteractionEnabled = true
-		let tap = UITapGestureRecognizer(target: self, action: #selector(NetworkViewController.dismissFullscreenImage(sender:)))
-		newImageView.addGestureRecognizer(tap)
-		self.view.addSubview(newImageView)
-		self.navigationController?.isNavigationBarHidden = true
-		self.tabBarController?.tabBar.isHidden = true
-	}
-	
-	func dismissFullscreenImage(sender: UITapGestureRecognizer) {
-		self.navigationController?.isNavigationBarHidden = false
-		sender.view?.removeFromSuperview()
+	override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+		if segue.identifier == "segueImageView"{
+			let controller = segue.destination as! ImageScrollerViewController
+			controller.images = images
+		}else if segue.identifier == "segueSettings"{
+			let controller = segue.destination as! SettingsViewController
+			controller.networkVizController = self
+		}
 	}
 }
 extension NetworkViewController: UICollectionViewDelegate{
 	func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
 		print("selected an item on collection view")
 		if let cell = collectionView.cellForItem(at: indexPath) as? ImageCell{
-			imageTapped(imageView: cell.imageView)
+			performSegue(withIdentifier: "segueImageView", sender: images)
 		}
 	}
 }
@@ -342,18 +338,17 @@ extension NetworkViewController{
 		node.geometry = SCNSphere(radius: CGFloat(node.radius))
 		node.position = SCNVector3Make(Float(node.x), Float(node.y), Float(node.z))
 		node.geometry?.firstMaterial?.diffuse.contents = unselectedColor
+		//node.constraints = [SCNLookAtConstraint(target: cameraNode)]
 		sceneView.scene!.rootNode.addChildNode(node)
-		//nodeArray.append(node)
+
 	}
 	func drawText(on node: JCGraphNode, text: String){
 		let myWord = SCNText(string: text, extrusionDepth: CGFloat(node.radius/50))
-		myWord.font = UIFont.systemFont(ofSize: CGFloat(node.radius/10))
+		myWord.font = UIFont.systemFont(ofSize: CGFloat(node.radius))
 		let wordNode = SCNNode(geometry: myWord)
-		var position = node.position
-		position.x = position.x - 1
-		position.y = position.y - 1 + Float(node.radius)
-		wordNode.position = position
-		sceneView.scene!.rootNode.addChildNode(wordNode)
+		node.addChildNode(wordNode)
+		wordNode.position = SCNVector3Make(Float(-1*node.radius*4), -1 + Float(node.radius), 0)
+
 	}
 	func drawCylinder(with line: JCGraphLine) -> SCNNode{
 		
@@ -421,7 +416,9 @@ extension NetworkViewController{
 	func drawNodes(nodes: [String:JCGraphNode]){
 		for node in nodes.values{
 			drawNode(node: node)
-			drawText(on: node, text: node.name!)
+			if (showNameLabels){
+				drawText(on: node, text: node.name!)
+			}
 		}
 	}
 	func clearGraph(){
