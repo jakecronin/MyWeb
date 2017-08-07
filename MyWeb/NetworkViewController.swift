@@ -249,6 +249,21 @@ class NetworkViewController: UIViewController{
 			controller.networkVizController = self
 		}
 	}
+	
+	@IBAction func profileViewTapped(sender: AnyObject){
+		guard selectedNode != nil else{
+			return
+		}
+		nodeUnselected(node: selectedNode!)
+	}
+	@IBAction func twoViewTapped(sender: AnyObject){
+		guard selectedNode != nil else{
+			return
+		}
+		nodeUnselected(node: selectedNode!)
+	}
+
+ 
 }
 extension NetworkViewController: UICollectionViewDelegate{
 	func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
