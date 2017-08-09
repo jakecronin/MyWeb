@@ -186,18 +186,20 @@ extension FacebookHandler{
 	fileprivate func getPhotosContinueFunction(afterCursor: String?){
 		photoRequestCompletionCount = photoRequestCompletionCount + 1
 		if photoRequestCompletionCount >= photoRequestsToMake{
+			print("finished queueing photo ids with \(photosJSON.count) raw photos")
 			delegate?.didGetAllPhotos(photos: self.namesInPhotos(photos: self.photosJSON))
 		}
 	}
 	fileprivate func namesInPhotos(photos: [[String: Any]]) -> [String:[String]]{
 		photosPaged = 0
 		photosNames = [String:[String]]()	//list of names in each photo
-		
 		for photo in photos{
 			let id = photo["id"] as! String
 			photosNames[id] = names(from: photo)
 			if let myName = myProfile?["name"] as? String{		//make sure each node connects to me even if i'm not tagged
-				photosNames[id]!.append(myName)
+				if photosNames[id]!.contains(myName) == false{
+					photosNames[id]!.append(myName)
+				}
 			}
 		}
 		print("got \(photosNames.count) photos")

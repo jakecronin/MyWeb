@@ -49,10 +49,9 @@ class JCGraphMaker{
 				adjList[node.key]!.append(nodeB)
 				let ids = connection.value
 				if adjList[nodeB.name!]!.count == 0{	//didn't visit B node yet, reverse line was not already added
-					print("adding line")
 					lines.append(JCGraphLine(nodeA: node.value, nodeB: nodeB, ids: ids))
+					print("building line with ids: \(ids)")
 				}else{
-					print("skipping line, reverse already added")
 				}
 			}
 		}

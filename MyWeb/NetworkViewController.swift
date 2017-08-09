@@ -123,6 +123,15 @@ class NetworkViewController: UIViewController{
 				})
 				
 			})
+			if let ids = photosByName?[n.name!]{
+				print("Selected Graph Node With Photo IDs: \(ids)")
+				FacebookHandler.getPhotosFor(ids: ids, delegate: self)
+			}else{
+				print("selected node, but there is no photosByName for this name")
+				if photosByName == nil{
+					print("and photos by name is nil")
+				}
+			}
 			n.selected = true
 		}else if let n = node.parent?.parent?.parent as? JCGraphLine{
 			UIView.animate(withDuration: 0.2, animations: {
@@ -145,6 +154,7 @@ class NetworkViewController: UIViewController{
 	}
 	func nodeUnselected(node: SCNNode){
 		if let n = node as? JCGraphNode{
+			images = nil
 			n.selected = false
 			self.profPic.image = nil
 			UIView.animate(withDuration: 0.2, animations: {
@@ -216,6 +226,15 @@ class NetworkViewController: UIViewController{
 	}
 	
 	@IBAction func refreshPressed(sender: AnyObject?){
+		if selectedNode != nil{
+			nodeUnselected(node: selectedNode!)
+		}
+		namesByPhoto = nil
+		photosByName = nil
+		connections = nil
+		friendsGraph = nil
+		images = nil
+		
 		let facebookHandler = FacebookHandler()
 		facebookHandler.getAllPhotos(delegate: self)
 		/*guard friendsGraph != nil else{
@@ -310,6 +329,7 @@ extension NetworkViewController: facebookHandlerDelegate{
 		var graph = [String:[String: [String]]]() //Jake -> [Friend:[photo ID of photos with Jake and Friend]]
 		photosByName = [String:[String]]()			//name -> photo ids
 		for photo in photos!{
+			print("looking at photo: \(photo.key) with names: \(photo.value)")
 			for name in photo.value{
 				if graph[name] == nil{
 					graph[name] = [String: [String]]()
@@ -323,13 +343,19 @@ extension NetworkViewController: facebookHandlerDelegate{
 					if graph[name]![tagged] == nil{			//build graph
 						graph[name]![tagged] = [String]()
 					}
+					print("adding \(photo.key) to \(name) with\(tagged)")
 					graph[name]![tagged]!.append(photo.key)
 					
 					if photosByName![name] == nil{			//build photosByName
 						photosByName![name] = [String]()
 					}
-					photosByName![name]!.append(photo.key)
 				}
+				
+				//Populate PhotosByName
+				if photosByName![name] == nil{
+					photosByName![name] = [String]()
+				}
+				photosByName![name]!.append(photo.key)
 			}
 		}
 		print("Got \(graph.keys.count) names")
