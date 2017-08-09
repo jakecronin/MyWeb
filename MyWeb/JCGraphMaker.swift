@@ -33,6 +33,7 @@ class JCGraphMaker{
 		var lines = [JCGraphLine]()
 		var center: JCGraphNode?
 		
+		
 		for friend in connections{	//make friendNode out of each name
 			let weight = 0.08 + (0.003 * Double(friend.value.count))	//weight represents number of people that connect to this node
 			let newNode = JCGraphNode(name: friend.key, weight: weight)
@@ -41,17 +42,23 @@ class JCGraphMaker{
 			nodes[friend.key] = newNode
 			adjList[friend.key] = [JCGraphNode]()
 		}
+		
 		for node in nodes{	//for each friend's connection dictionary
 			for connection in connections[node.key]!{	//for each connection dictionary to photo id array
 				let nodeB = nodes[connection.key]!
 				adjList[node.key]!.append(nodeB)
 				let ids = connection.value
-				lines.append(JCGraphLine(nodeA: node.value, nodeB: nodeB, ids: ids))
+				if adjList[nodeB.name!]!.count == 0{	//didn't visit B node yet, reverse line was not already added
+					print("adding line")
+					lines.append(JCGraphLine(nodeA: node.value, nodeB: nodeB, ids: ids))
+				}else{
+					print("skipping line, reverse already added")
+				}
 			}
 		}
 		var graph = JCGraph(adjList: adjList, nodes: nodes, lines: lines)
 		graph.center = graph.nodes["Jake Cronin"]
-		initializeCoordinates(for: nodes, with: graph.center!)
+		initializeCoordinates(for: nodes, with: graph.center)
 		
 		delegate?.graphIsComplete(graph: graph)
 	}

@@ -245,18 +245,28 @@
                                     <outletCollection property="gestureRecognizers" destination="Keh-Gu-V3P" appends="YES" id="PQV-Bp-kPm"/>
                                 </connections>
                             </view>
+                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="No Nodes to show. Tag friends in your facebook photos to view your network!" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Mhi-3B-xvf">
+                                <rect key="frame" x="46" y="303" width="283" height="61"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="KAE-Ij-wCy" secondAttribute="trailing" id="Ag1-Om-JBp"/>
                             <constraint firstItem="CDF-5g-Uuf" firstAttribute="top" secondItem="XHE-cY-JrG" secondAttribute="bottom" constant="8" id="JR0-ci-gNZ"/>
                             <constraint firstItem="PYa-cB-C55" firstAttribute="top" secondItem="KAE-Ij-wCy" secondAttribute="bottom" id="Jpb-RB-yjO"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="Mhi-3B-xvf" secondAttribute="trailing" constant="30" id="S9K-Fe-DZ3"/>
                             <constraint firstItem="SNl-19-CcM" firstAttribute="top" secondItem="XHE-cY-JrG" secondAttribute="bottom" constant="8" id="VLf-TE-BST"/>
                             <constraint firstItem="SNl-19-CcM" firstAttribute="centerX" secondItem="UsM-RL-Wdr" secondAttribute="centerX" id="YXz-0i-OWI"/>
                             <constraint firstAttribute="trailing" secondItem="z1U-dK-uqK" secondAttribute="trailing" id="aKO-WY-ssm"/>
                             <constraint firstItem="PYa-cB-C55" firstAttribute="top" secondItem="z1U-dK-uqK" secondAttribute="bottom" id="j0J-Eo-m2a"/>
+                            <constraint firstItem="Mhi-3B-xvf" firstAttribute="centerX" secondItem="UsM-RL-Wdr" secondAttribute="centerX" id="kQx-Vp-mwE"/>
                             <constraint firstItem="KAE-Ij-wCy" firstAttribute="leading" secondItem="UsM-RL-Wdr" secondAttribute="leading" id="lS7-EM-Ahu"/>
                             <constraint firstItem="CDF-5g-Uuf" firstAttribute="centerX" secondItem="UsM-RL-Wdr" secondAttribute="centerX" id="mvC-9A-R1g"/>
+                            <constraint firstItem="Mhi-3B-xvf" firstAttribute="centerY" secondItem="UsM-RL-Wdr" secondAttribute="centerY" id="nQQ-6I-sUt"/>
+                            <constraint firstItem="Mhi-3B-xvf" firstAttribute="leading" secondItem="UsM-RL-Wdr" secondAttribute="leadingMargin" constant="30" id="roL-f4-SkH"/>
                             <constraint firstItem="KAE-Ij-wCy" firstAttribute="top" secondItem="UsM-RL-Wdr" secondAttribute="top" id="tU2-xF-gza"/>
                             <constraint firstItem="z1U-dK-uqK" firstAttribute="leading" secondItem="UsM-RL-Wdr" secondAttribute="leading" id="ybI-pz-yJi"/>
                         </constraints>
@@ -278,6 +288,7 @@
                         <outlet property="leftName" destination="29Z-ZU-eHO" id="9I7-fg-BOy"/>
                         <outlet property="leftPic" destination="B0z-Z1-gyb" id="6bF-Dd-LK4"/>
                         <outlet property="nameLabel" destination="Pjv-1E-mZ1" id="H7e-LO-Uhu"/>
+                        <outlet property="noNodesLabel" destination="Mhi-3B-xvf" id="l5r-1z-5VF"/>
                         <outlet property="profPic" destination="ji9-4S-aLS" id="Ku9-AP-X91"/>
                         <outlet property="profileView" destination="CDF-5g-Uuf" id="cxJ-PM-ckV"/>
                         <outlet property="rightName" destination="4ST-Z0-XkK" id="fti-JJ-d2b"/>

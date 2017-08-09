@@ -59,27 +59,29 @@ class FacebookHandler{
 		connection.add(nameRequest, batchEntryName: "UserName") { (httpResponse, result) in
 			switch result{
 			case .success(response: let response):
-				var profile = [String: Any]()
-				profile["name"] = response.dictionaryValue?["name"] as? String
-				profile["id"] = response.dictionaryValue?["id"] as? String
-				profile["email"] = response.dictionaryValue?["email"] as? String
+				if myProfile == nil{
+					myProfile = [String: Any]()
+				}
+				myProfile!["name"] = response.dictionaryValue?["name"] as? String
+				myProfile!["id"] = response.dictionaryValue?["id"] as? String
+				myProfile!["email"] = response.dictionaryValue?["email"] as? String
 				if let urlString = ((response.dictionaryValue?["picture"] as? [String: Any])?["data"] as? [String: Any])?["url"] as? String{
 					let url = URL(string: urlString)!
 					getDataFromUrl(url: url) { (data, response, error)  in
 						guard let data = data, error == nil else {
 							print(error)
-							delegate.didGetMyProfile(profile: profile)
+							delegate.didGetMyProfile(profile: myProfile)
 							return
 						}
-						profile["picture"] = UIImage(data: data)
-						delegate.didGetMyProfile(profile: profile)
+						myProfile!["picture"] = UIImage(data: data)
+						delegate.didGetMyProfile(profile: myProfile)
 					}
 				}else{
-					delegate.didGetMyProfile(profile: profile)
+					delegate.didGetMyProfile(profile: myProfile)
 				}
 			case .failed(let error):
 				print("could not get profile: \(error)")
-				delegate.didGetMyProfile(profile: nil)
+				delegate.didGetMyProfile(profile: myProfile)
 			}
 		}
 		connection.start()
@@ -184,21 +186,22 @@ extension FacebookHandler{
 	fileprivate func getPhotosContinueFunction(afterCursor: String?){
 		photoRequestCompletionCount = photoRequestCompletionCount + 1
 		if photoRequestCompletionCount >= photoRequestsToMake{
-			self.pagePhotos(photos: self.photosJSON)
+			delegate?.didGetAllPhotos(photos: self.namesInPhotos(photos: self.photosJSON))
 		}
 	}
-	fileprivate func pagePhotos(photos: [[String: Any]]){
+	fileprivate func namesInPhotos(photos: [[String: Any]]) -> [String:[String]]{
 		photosPaged = 0
-		photosNames = [String:[String]]()
+		photosNames = [String:[String]]()	//list of names in each photo
 		
 		for photo in photos{
 			let id = photo["id"] as! String
 			photosNames[id] = names(from: photo)
-			//pagePhotoTags(afterCursor: nil, id: id, completion: { (next, id) in
-			//	self.pagePhotoTagsContinueFunction(afterCursor: next, id: id)
-			//})
+			if let myName = myProfile?["name"] as? String{		//make sure each node connects to me even if i'm not tagged
+				photosNames[id]!.append(myName)
+			}
 		}
 		print("got \(photosNames.count) photos")
+		return photosNames
 		delegate?.didGetAllPhotos(photos: photosNames)
 	}
 	

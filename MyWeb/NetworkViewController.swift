@@ -13,6 +13,7 @@ import SceneKit
 import FBSDKCoreKit
 import OpenGLES
 
+var myProfile: [String: Any]?
 
 class NetworkViewController: UIViewController{
 	
@@ -39,6 +40,7 @@ class NetworkViewController: UIViewController{
 	@IBOutlet weak var leftName: UILabel!
 	@IBOutlet weak var rightName: UILabel!
 
+	@IBOutlet weak var noNodesLabel: UILabel!
 	
 	var cameraNode = SCNNode()
 	var selectedNode: SCNNode?
@@ -79,7 +81,7 @@ class NetworkViewController: UIViewController{
 		cameraNode.position = cameraOrigin
 		scene.rootNode.addChildNode(cameraNode)
 		
-		sceneView.showsStatistics = true
+		sceneView.showsStatistics = false
 		sceneView.backgroundColor = UIColor.black
 		
 		let tapRecognizer = UITapGestureRecognizer(target: self, action:  #selector(NetworkViewController.tapRecognizer(_:)))
@@ -137,7 +139,7 @@ class NetworkViewController: UIViewController{
 					self.rightPic.image = image?.rounded(radius: 5)
 				})
 			})
-			print("ids: \(n.ids)")
+			print("Selected Graph Line With Photo IDs: \(n.ids)")
 			FacebookHandler.getPhotosFor(ids: n.ids!, delegate: self)
 		}
 	}
@@ -214,7 +216,9 @@ class NetworkViewController: UIViewController{
 	}
 	
 	@IBAction func refreshPressed(sender: AnyObject?){
-		guard friendsGraph != nil else{
+		let facebookHandler = FacebookHandler()
+		facebookHandler.getAllPhotos(delegate: self)
+		/*guard friendsGraph != nil else{
 			return
 		}
 		self.clearGraph()
@@ -225,7 +229,7 @@ class NetworkViewController: UIViewController{
 			friendsGraph?.nodes[myName!]!.centerNode()
 		}
 		self.drawNodes(nodes: friendsGraph!.nodes)
-		self.drawLines(lines: friendsGraph!.lines)
+		self.drawLines(lines: friendsGraph!.lines)*/
 
 	}
 	func imagesUpdated(){
@@ -429,6 +433,11 @@ extension NetworkViewController{
 		}
 	}
 	func drawNodes(nodes: [String:JCGraphNode]){
+		guard nodes.count > 0 else{
+			noNodesLabel.isHidden = false
+			return
+		}
+		noNodesLabel.isHidden = true
 		for node in nodes.values{
 			drawNode(node: node)
 			if (showNameLabels){
