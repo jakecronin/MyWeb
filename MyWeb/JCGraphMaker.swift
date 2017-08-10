@@ -50,13 +50,14 @@ class JCGraphMaker{
 				let ids = connection.value
 				if adjList[nodeB.name!]!.count == 0{	//didn't visit B node yet, reverse line was not already added
 					lines.append(JCGraphLine(nodeA: node.value, nodeB: nodeB, ids: ids))
-					print("building line with ids: \(ids)")
 				}else{
 				}
 			}
 		}
 		var graph = JCGraph(adjList: adjList, nodes: nodes, lines: lines)
-		graph.center = graph.nodes["Jake Cronin"]
+		if let name = myProfile?["name"] as? String{
+			graph.center = graph.nodes[name]
+		}
 		initializeCoordinates(for: nodes, with: graph.center)
 		
 		delegate?.graphIsComplete(graph: graph)
@@ -92,7 +93,7 @@ class JCGraphMaker{
 		}
 		for node in graph.nodes{
 			node.value.updatePosition()
-			if node.value.name == "Jake Cronin"{
+			if node.value == graph.center{
 				node.value.centerNode()
 			}
 		}

@@ -11,3 +11,4 @@ import Foundation
 
 var admobAppID = "ca-app-pub-7240573263963478~3305371499"
 var admobBannerID =  "ca-app-pub-7240573263963478/9143009779"
+var admobInterstitialID = "ca-app-pub-7240573263963478/9277320265"

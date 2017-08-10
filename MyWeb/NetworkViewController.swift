@@ -12,11 +12,16 @@ import FacebookCore
 import SceneKit
 import FBSDKCoreKit
 import OpenGLES
+import GoogleMobileAds
 
 var myProfile: [String: Any]?
 
 class NetworkViewController: UIViewController{
 	
+	var bannerView: GADBannerView!
+	var interstitial: GADInterstitial!
+
+
 	var myName: String?
 	
 	var unselectedColor = UIColor.green
@@ -62,13 +67,12 @@ class NetworkViewController: UIViewController{
 
 	override func viewDidLoad() {
 		print("network view controller loaded")
+		loadAds()
 		leftPic.layer.cornerRadius = 10
 		rightPic.layer.cornerRadius = 10
 		leftPic.clipsToBounds = true
 		sceneSetup()
-		FacebookHandler.getMyProfile(delegate: self)
-		let facebookHandler = FacebookHandler()
-		facebookHandler.getAllPhotos(delegate: self)	//graph greated in didGetAllPhotosDelegate
+		refreshPressed(sender: nil)
 	}
 	override func viewWillAppear(_ animated: Bool) {
 		refreshPressed(sender: nil)
@@ -235,21 +239,10 @@ class NetworkViewController: UIViewController{
 		friendsGraph = nil
 		images = nil
 		
+		createAndLoadInterstitial()
+		FacebookHandler.getMyProfile(delegate: self)
 		let facebookHandler = FacebookHandler()
 		facebookHandler.getAllPhotos(delegate: self)
-		/*guard friendsGraph != nil else{
-			return
-		}
-		self.clearGraph()
-		for i in 0..<100{
-			JCGraphMaker.sharedInstance.applyPhysics(to: friendsGraph!)
-		}
-		if (myName != nil){
-			friendsGraph?.nodes[myName!]!.centerNode()
-		}
-		self.drawNodes(nodes: friendsGraph!.nodes)
-		self.drawLines(lines: friendsGraph!.lines)*/
-
 	}
 	func imagesUpdated(){
 		print("images updated")
@@ -286,6 +279,26 @@ class NetworkViewController: UIViewController{
 		nodeUnselected(node: selectedNode!)
 	}
 
+	fileprivate func loadAds(){
+		bannerView = GADBannerView(adSize: kGADAdSizeSmartBannerPortrait)
+		self.view.addSubview(bannerView)
+		bannerView.center = self.view.center
+		bannerView.frame.origin.y = self.view.frame.maxY - bannerView.frame.height - 44
+		bannerView.adUnitID = admobBannerID
+		bannerView.rootViewController = self
+		let request = GADRequest()
+		request.testDevices = [kGADSimulatorID]//, "9D6F8FE6-6ACA-5E9A-A496-61A0AE85D71A"]
+		bannerView.load(request)
+	}
+	fileprivate func createAndLoadInterstitial() {
+		print("in create and load interstitial")
+		interstitial = GADInterstitial(adUnitID: admobInterstitialID)
+		let request = GADRequest()
+		interstitial.load(request)
+		interstitial.present(fromRootViewController: self)
+		print("presenting interstitial")
+	}
+	
  
 }
 extension NetworkViewController: UICollectionViewDelegate{
