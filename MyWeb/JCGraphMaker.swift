@@ -15,7 +15,7 @@ protocol JCGraphMakerDelegate {
 class JCGraphMaker{
 	
 	//Formatting Variable
-	let attractScale: Double = 0.0002
+	let attractScale: Double = 0.0004
 	let repulsScale: Double =  0.02
 	
 	let max: Double = 5

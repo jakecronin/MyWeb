@@ -18,9 +18,18 @@ var myProfile: [String: Any]?
 
 class NetworkViewController: UIViewController{
 	
+	var reloadsPerAdd = 3
+	var numReloads = 0{
+		didSet{
+			print("num reloads: \(numReloads)")
+		}
+	}
+	
+	
 	var bannerView: GADBannerView!
 	var interstitial: GADInterstitial!
-
+	
+	var activityIndicator = UIActivityIndicatorView()
 
 	var myName: String?
 	
@@ -30,7 +39,14 @@ class NetworkViewController: UIViewController{
 	var lineSelectedColor = UIColor.orange
 	var cameraOrigin = SCNVector3Make(0, 0, 20)
 	
-	var showNameLabels = false
+	//var needToRedraw = false
+	var showNameLabels = false//{
+	//	didSet{
+	//		needToRedraw = true
+	//	}
+	//}
+	
+	var nameLabelNodes = [SCNNode]()
 	
 	@IBOutlet weak var sceneView: SCNView!
 	@IBOutlet weak var collectionView: UICollectionView!
@@ -72,10 +88,10 @@ class NetworkViewController: UIViewController{
 		rightPic.layer.cornerRadius = 10
 		leftPic.clipsToBounds = true
 		sceneSetup()
-		refreshPressed(sender: nil)
+		refreshGraph()
 	}
 	override func viewWillAppear(_ animated: Bool) {
-		refreshPressed(sender: nil)
+	
 	}
 	func sceneSetup(){
 		let scene = SCNScene()
@@ -230,6 +246,26 @@ class NetworkViewController: UIViewController{
 	}
 	
 	@IBAction func refreshPressed(sender: AnyObject?){
+		refreshGraph()
+	}
+
+	func redrawGraph(){
+		guard friendsGraph != nil else{
+			return
+		}
+		clearGraph()
+		drawLines(lines: friendsGraph!.lines)
+		self.drawNodes(nodes: friendsGraph!.nodes)
+	}
+	func refreshGraph(){
+		guard activityIndicator.isAnimating == false else{
+			return
+		}
+		beginActivityIndicator()
+		numReloads = (numReloads + 1) % reloadsPerAdd
+		if numReloads == 1{
+			createAndLoadInterstitial()
+		}
 		if selectedNode != nil{
 			nodeUnselected(node: selectedNode!)
 		}
@@ -239,13 +275,11 @@ class NetworkViewController: UIViewController{
 		friendsGraph = nil
 		images = nil
 		
-		createAndLoadInterstitial()
 		FacebookHandler.getMyProfile(delegate: self)
 		let facebookHandler = FacebookHandler()
 		facebookHandler.getAllPhotos(delegate: self)
 	}
 	func imagesUpdated(){
-		print("images updated")
 		DispatchQueue.main.async {
 			guard self.images != nil else{
 				self.collectionView.isHidden = true
@@ -283,23 +317,48 @@ class NetworkViewController: UIViewController{
 		bannerView = GADBannerView(adSize: kGADAdSizeSmartBannerPortrait)
 		self.view.addSubview(bannerView)
 		bannerView.center = self.view.center
-		bannerView.frame.origin.y = self.view.frame.maxY - bannerView.frame.height - 44
+		bannerView.frame.origin.y = self.view.frame.maxY - bannerView.frame.height
 		bannerView.adUnitID = admobBannerID
 		bannerView.rootViewController = self
 		let request = GADRequest()
 		request.testDevices = [kGADSimulatorID]//, "9D6F8FE6-6ACA-5E9A-A496-61A0AE85D71A"]
 		bannerView.load(request)
-	}
-	fileprivate func createAndLoadInterstitial() {
-		print("in create and load interstitial")
-		interstitial = GADInterstitial(adUnitID: admobInterstitialID)
-		let request = GADRequest()
-		interstitial.load(request)
-		interstitial.present(fromRootViewController: self)
-		print("presenting interstitial")
-	}
+	}	//for banner
 	
- 
+	func beginActivityIndicator(){
+		activityIndicator = UIActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 150, height: 150))
+		activityIndicator.center = self.view.center
+		activityIndicator.hidesWhenStopped = true
+		activityIndicator.color = themeMainColor
+		self.view.addSubview(activityIndicator)
+		activityIndicator.startAnimating()
+	}
+	func stopActivityIndicator(){
+		activityIndicator.removeFromSuperview()
+		self.activityIndicator.stopAnimating()
+	}
+}
+extension NetworkViewController: GADInterstitialDelegate{
+	fileprivate func createAndLoadInterstitial() {
+		interstitial = GADInterstitial(adUnitID: admobInterstitialID)
+		interstitial.delegate = self
+		let request = GADRequest()
+		request.testDevices = [kGADSimulatorID]
+		interstitial.load(request)
+	}
+	func interstitialDidReceiveAd(_ ad: GADInterstitial) {
+		ad.present(fromRootViewController: self)
+	}
+	func interstitialDidDismissScreen(_ ad: GADInterstitial) {
+	}
+	func presentInterstitialAd() {
+		if interstitial.isReady {
+			print("interstitial ready, presenting")
+			interstitial.present(fromRootViewController: self)
+		}else{
+			print("interstiaial not ready")
+		}
+	}
 }
 extension NetworkViewController: UICollectionViewDelegate{
 	func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -342,7 +401,6 @@ extension NetworkViewController: facebookHandlerDelegate{
 		var graph = [String:[String: [String]]]() //Jake -> [Friend:[photo ID of photos with Jake and Friend]]
 		photosByName = [String:[String]]()			//name -> photo ids
 		for photo in photos!{
-			print("looking at photo: \(photo.key) with names: \(photo.value)")
 			for name in photo.value{
 				if graph[name] == nil{
 					graph[name] = [String: [String]]()
@@ -356,7 +414,6 @@ extension NetworkViewController: facebookHandlerDelegate{
 					if graph[name]![tagged] == nil{			//build graph
 						graph[name]![tagged] = [String]()
 					}
-					print("adding \(photo.key) to \(name) with\(tagged)")
 					graph[name]![tagged]!.append(photo.key)
 					
 					if photosByName![name] == nil{			//build photosByName
@@ -404,6 +461,7 @@ extension NetworkViewController{
 		let myWord = SCNText(string: text, extrusionDepth: CGFloat(node.radius/50))
 		myWord.font = UIFont.systemFont(ofSize: CGFloat(node.radius))
 		let wordNode = SCNNode(geometry: myWord)
+		nameLabelNodes.append(wordNode)
 		node.addChildNode(wordNode)
 		wordNode.position = SCNVector3Make(Float(-1*node.radius*4), -1 + Float(node.radius), 0)
 
@@ -476,7 +534,11 @@ extension NetworkViewController{
 			noNodesLabel.isHidden = false
 			return
 		}
+		print("drawing nodes and name labels is set to \(showNameLabels)")
 		noNodesLabel.isHidden = true
+		for node in nameLabelNodes{
+			node.removeFromParentNode()
+		}
 		for node in nodes.values{
 			drawNode(node: node)
 			if (showNameLabels){
@@ -499,7 +561,7 @@ extension NetworkViewController: JCGraphMakerDelegate{
 		self.drawNodes(nodes: graph.nodes)
 		self.drawLines(lines: graph.lines)
 		self.friendsGraph = graph
-		print("finished drawing, nodes: \(sceneView.scene!.rootNode.childNodes.count)")
+		stopActivityIndicator()
 	}
 }
 

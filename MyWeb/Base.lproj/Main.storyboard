@@ -143,7 +143,7 @@
                                 </connections>
                             </view>
                             <collectionView hidden="YES" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" indicatorStyle="black" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="z1U-dK-uqK">
-                                <rect key="frame" x="0.0" y="487" width="375" height="180"/>
+                                <rect key="frame" x="0.0" y="437" width="375" height="180"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="180" id="vSN-6Y-Qhe"/>
                                 </constraints>
@@ -261,7 +261,7 @@
                             <constraint firstItem="SNl-19-CcM" firstAttribute="top" secondItem="XHE-cY-JrG" secondAttribute="bottom" constant="8" id="VLf-TE-BST"/>
                             <constraint firstItem="SNl-19-CcM" firstAttribute="centerX" secondItem="UsM-RL-Wdr" secondAttribute="centerX" id="YXz-0i-OWI"/>
                             <constraint firstAttribute="trailing" secondItem="z1U-dK-uqK" secondAttribute="trailing" id="aKO-WY-ssm"/>
-                            <constraint firstItem="PYa-cB-C55" firstAttribute="top" secondItem="z1U-dK-uqK" secondAttribute="bottom" id="j0J-Eo-m2a"/>
+                            <constraint firstItem="PYa-cB-C55" firstAttribute="top" secondItem="z1U-dK-uqK" secondAttribute="bottom" constant="50" id="j0J-Eo-m2a"/>
                             <constraint firstItem="Mhi-3B-xvf" firstAttribute="centerX" secondItem="UsM-RL-Wdr" secondAttribute="centerX" id="kQx-Vp-mwE"/>
                             <constraint firstItem="KAE-Ij-wCy" firstAttribute="leading" secondItem="UsM-RL-Wdr" secondAttribute="leading" id="lS7-EM-Ahu"/>
                             <constraint firstItem="CDF-5g-Uuf" firstAttribute="centerX" secondItem="UsM-RL-Wdr" secondAttribute="centerX" id="mvC-9A-R1g"/>
@@ -360,7 +360,7 @@
                                                 <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="IL9-eI-BK0">
                                                     <rect key="frame" x="318" y="6" width="51" height="31"/>
                                                     <connections>
-                                                        <action selector="nameLabelsChangedWithSwitch:" destination="Iuu-mw-V3h" eventType="valueChanged" id="ng7-JI-Hpv"/>
+                                                        <action selector="nameLabelsChangedWithMySwitch:" destination="Iuu-mw-V3h" eventType="valueChanged" id="kkl-yc-kQu"/>
                                                     </connections>
                                                 </switch>
                                             </subviews>
@@ -424,6 +424,7 @@
                         <outlet property="loggedInAsLabel" destination="p8N-fT-8xC" id="VWJ-nJ-9TX"/>
                         <outlet property="nameLabelSwitch" destination="IL9-eI-BK0" id="HDX-uW-7YJ"/>
                         <segue destination="43b-EE-rWn" kind="unwind" identifier="unwindToSettings" unwindAction="unwindToLoginWithSegue:" id="Hg2-x6-3by"/>
+                        <segue destination="43b-EE-rWn" kind="unwind" identifier="unwindNetworkViz" unwindAction="unwindToNetworkVizWithSegue:" id="ziB-qU-pro"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dEy-KO-UQh" userLabel="First Responder" sceneMemberID="firstResponder"/>

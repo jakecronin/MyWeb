@@ -19,6 +19,7 @@ class SettingsViewController: UITableViewController{
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()
+		
 		print("\(networkVizController.description)")
 		nameLabelSwitch.isOn = networkVizController.showNameLabels
 		if let name = networkVizController.myProfile["name"] as? String{
@@ -31,9 +32,12 @@ class SettingsViewController: UITableViewController{
 		FBSDKLoginManager().logOut()
 		performSegue(withIdentifier: "unwindToSettings", sender: nil)
 	}
-	@IBAction func nameLabelsChanged(switch: UISwitch){
+	@IBAction func nameLabelsChanged(mySwitch: UISwitch){
 		networkVizController.showNameLabels = nameLabelSwitch.isOn
 	}
 	
+	override func willMove(toParentViewController parent: UIViewController?) {
+		networkVizController.redrawGraph()
+	}
 	
 }
