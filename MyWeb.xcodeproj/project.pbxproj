@@ -23,6 +23,7 @@
 		633A193F1F129F5000008D5A /* JCGraphNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633A193E1F129F5000008D5A /* JCGraphNode.swift */; };
 		633A19431F12A06900008D5A /* JCGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633A19421F12A06900008D5A /* JCGraph.swift */; };
 		634EBB2D1F3C03490094E998 /* GlobalVariables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 634EBB2C1F3C03490094E998 /* GlobalVariables.swift */; };
+		634EBB2F1F3E1F5B0094E998 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 634EBB2E1F3E1F5B0094E998 /* WelcomeView.swift */; };
 		63961D421F364A7E00068FA5 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63961D411F364A7E00068FA5 /* Extensions.swift */; };
 		63961D441F36643500068FA5 /* ImageScrollerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63961D431F36643500068FA5 /* ImageScrollerViewController.swift */; };
 		63961D471F3685CA00068FA5 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63961D461F3685CA00068FA5 /* SettingsViewController.swift */; };
@@ -74,6 +75,7 @@
 		633A193E1F129F5000008D5A /* JCGraphNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JCGraphNode.swift; sourceTree = "<group>"; };
 		633A19421F12A06900008D5A /* JCGraph.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JCGraph.swift; sourceTree = "<group>"; };
 		634EBB2C1F3C03490094E998 /* GlobalVariables.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlobalVariables.swift; sourceTree = "<group>"; };
+		634EBB2E1F3E1F5B0094E998 /* WelcomeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		63961D411F364A7E00068FA5 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		63961D431F36643500068FA5 /* ImageScrollerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageScrollerViewController.swift; sourceTree = "<group>"; };
 		63961D461F3685CA00068FA5 /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
@@ -182,6 +184,7 @@
 				633A18FE1F11A2F700008D5A /* NetworkViewController.swift */,
 				63961D431F36643500068FA5 /* ImageScrollerViewController.swift */,
 				63961D461F3685CA00068FA5 /* SettingsViewController.swift */,
+				634EBB2E1F3E1F5B0094E998 /* WelcomeView.swift */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -507,6 +510,7 @@
 				633A18FF1F11A2F700008D5A /* NetworkViewController.swift in Sources */,
 				633A18D11F11A20100008D5A /* AppDelegate.swift in Sources */,
 				63961D471F3685CA00068FA5 /* SettingsViewController.swift in Sources */,
+				634EBB2F1F3E1F5B0094E998 /* WelcomeView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

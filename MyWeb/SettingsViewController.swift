@@ -32,6 +32,9 @@ class SettingsViewController: UITableViewController{
 		FBSDKLoginManager().logOut()
 		performSegue(withIdentifier: "unwindToSettings", sender: nil)
 	}
+	@IBAction func aboutPressed(sender: AnyObject){
+		performSegue(withIdentifier: "segueHelp", sender: self)
+	}
 	@IBAction func nameLabelsChanged(mySwitch: UISwitch){
 		networkVizController.showNameLabels = nameLabelSwitch.isOn
 	}

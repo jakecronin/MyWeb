@@ -64,6 +64,9 @@ class LoginViewController: UIViewController {
 			self.performSegue(withIdentifier: "segueLogin", sender: self)
 		}
 	}
+	func segueWecome(){
+		performSegue(withIdentifier: "segueWelcome", sender: self)
+	}
 	@IBAction func unwindToLogin(segue: UIStoryboardSegue){
 	}
 }
@@ -71,7 +74,7 @@ class LoginViewController: UIViewController {
 extension LoginViewController: FBSDKLoginButtonDelegate{
 	func loginButton(_ loginButton: FBSDKLoginButton!, didCompleteWith result: FBSDKLoginManagerLoginResult!, error: Error!) {
 		if let accessToken = AccessToken.current{
-			segueLogin()
+			segueWecome()
 		}else{
 			print("error loggin in with facebook")
 		}
