@@ -83,7 +83,7 @@ class NetworkViewController: UIViewController{
 
 	override func viewDidLoad() {
 		print("network view controller loaded")
-		loadAds()
+		//loadAds()
 		leftPic.layer.cornerRadius = 10
 		rightPic.layer.cornerRadius = 10
 		leftPic.clipsToBounds = true
