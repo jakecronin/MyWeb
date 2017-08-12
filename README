@@ -8,6 +8,3 @@ One weekend I grew tired of working on my KnifeLife app all day, so I decided to
 I used facebooks API to pull all of the tagged names in each of a user's photos and organized these names into a graph. I then created a force directed graph algorithm to spatially organize each of the names.
 
 This was a fun project as it allowed me to use Facebook's SDK as well as Apple's underappreciated SceneKit
-
-
-![something](MyWeb/Images/Simulator Screen Shot Aug 1, 2017, 10.51.48 PM.png)
