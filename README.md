@@ -18,4 +18,4 @@ Is this the image?:
 
 
 
-[Clean1]: /Images/Clean_Web_1.png = 150x150
+[Clean1]: Images/Clean_Web_1.png = 150x150
