@@ -13,6 +13,9 @@ This was a fun project as it allowed me to use Facebook's SDK as well as Apple's
 # Screenshots
 <img src="https://github.com/jakecronin/MyWeb/blob/master/Images/Clean_Web_1.png" width="200"/>
 <img src="https://github.com/jakecronin/MyWeb/blob/master/Images/Web_With_Names.png" width="200"/>
+<img src="https://github.com/jakecronin/MyWeb/blob/master/Images/Connection.png" width="200"/>
 
 ### Without Directed Graph Algorithm
 <img src="https://github.com/jakecronin/MyWeb/blob/master/Images/Unorganized_Web.png" width="200"/>
+
+
