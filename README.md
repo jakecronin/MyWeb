@@ -1,5 +1,6 @@
 # MyWeb
 iOS app that creates an interactive 3D web of a user's Facebook friends based on photo tags.
+
 *Swift, Facebook API, SceneKit, Force Directed Graph*
  
 # Motivation and Description
@@ -14,4 +15,4 @@ This was a fun project as it allowed me to use Facebook's SDK as well as Apple's
 <img src="https://github.com/jakecronin/MyWeb/blob/master/Images/Web_With_Names.png" width="200"/>
 
 # Without Directed Graph Algorithm
-<img src="https://github.com/jakecronin/MyWeb/blob/master/Images/Unorganized_Web.png" width="48"/>
+<img src="https://github.com/jakecronin/MyWeb/blob/master/Images/Unorganized_Web.png" width="200"/>
