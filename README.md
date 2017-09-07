@@ -1,7 +1,7 @@
-## MyWeb is an iOS app that creates an interactive 3D web of a user's Facebook friends based on photo tags.
+# MyWeb
+## iOS app that creates an interactive 3D web of a user's Facebook friends based on photo tags.
 
-# TECHNOLOGIES USED: 
-*Swift, Facebook API, SceneKit, Force Directed Algorithm*
+*Swift, Facebook API, SceneKit, Force Directed Graph*
  
 # Motivation and Description
 One weekend I grew tired of working on my KnifeLife app all day, so I decided to dig into my backlog of app ideas and pulled out this idea. I find social networks fascinating and wanted a way to view my own network through facebook. 
@@ -11,18 +11,8 @@ I used facebooks API to pull all of the tagged names in each of a user's photos 
 This was a fun project as it allowed me to use Facebook's SDK as well as Apple's underappreciated SceneKit
 
 # Screenshots
+![](https://github.com/jakecronin/MyWeb/blob/master/Images/Clean_Web_1.png =150x150)
+![](https://github.com/jakecronin/MyWeb/blob/master/Images/Web_With_Names.png =150x150)
 
-Is this the image?: 
-![alt text][Images/Clean_Web_1.png =150x150]
-
-![alt text][Images/Clean_Web_1.png]
-
-![alt text][/Images/Clean_Web_1.png]
-
-![alt text][./Images/Clean_Web_1.png]
-
-
-
-
-
-[Clean1]: Images/Clean_Web_1.png = 150x150
+# Without Directed Graph Algorithm
+![](https://github.com/jakecronin/MyWeb/blob/master/Images/Unorganized_Web.png =150x150)
