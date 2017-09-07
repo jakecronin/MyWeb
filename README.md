@@ -1,5 +1,7 @@
+<img src="https://github.com/jakecronin/MyWeb/blob/master/Images/MyWeb_Logo.png" width="200"/>
+
 # MyWeb
-iOS app that creates an interactive 3D web of a user's Facebook friends based on photo tags.
+iOS app that creates an interactive 3D web of a user's Facebook friends based on photo tags. ![Itunes Link](https://itunes.apple.com/us/app/myweb-visualizer/id1268356735?mt=8 "Itunes Link")
 
 *Swift, Facebook API, SceneKit, Force Directed Graph*
  
