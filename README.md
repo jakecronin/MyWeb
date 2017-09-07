@@ -13,7 +13,14 @@ This was a fun project as it allowed me to use Facebook's SDK as well as Apple's
 # Screenshots
 
 Is this the image?: 
-![alt text][Clean1]
+![alt text][Images/Clean_Web_1.png =150x150]
+
+![alt text][Images/Clean_Web_1.png]
+
+![alt text][/Images/Clean_Web_1.png]
+
+![alt text][./Images/Clean_Web_1.png]
+
 
 
 
